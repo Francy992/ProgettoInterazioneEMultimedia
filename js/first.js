@@ -35,12 +35,11 @@ for(i=0;i<imgMatrix.data.length;i+=4){
     
 }
 var mySlider = $("#slider").slider();
-console.log("Imgmatrix data vale: ");
 //Mostro le modifiche a schermo
 contex.putImageData(imgMatrix,0,0);
-console.log("Value: " + mySlider.slider('getValue'));
 mySlider.on("change", function(val){
     contex = canvas.getContext("2d");
+    contex.drawImage(img,0,0);
     imgMatrix = contex.getImageData(0, 0, canvas.width, canvas.height);
     for(i=0;i<imgMatrix.data.length;i+=4){
         //Red
@@ -63,7 +62,7 @@ mySlider.on("change", function(val){
         else if(imgMatrix.data[i+2]+val.value.newValue > 255)
             imgMatrix.data[i+2] = 255;
         else 
-            imgMatrix.data[i] = 0;
+            imgMatrix.data[i+2] = 0;
         
         //Alpha
         //    imgMatrix.data[i+3] = 230;
@@ -71,5 +70,6 @@ mySlider.on("change", function(val){
         
     }
     contex.putImageData(imgMatrix,0,0);
+    console.log(imgMatrix.data);
 
 });
