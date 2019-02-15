@@ -1,3 +1,7 @@
+var myImage = new Image(512, 512);
+myImage.src = 'source/lena.jpg';
+document.body.appendChild(myImage);
+
 console.log("Ciao");
 var c = document.getElementById("imageLenaModify");
 var ctx = c.getContext("2d");
@@ -31,9 +35,10 @@ for(i=0;i<imgMatrix.data.length;i+=4){
     imgMatrix.data[i+2] = imgMatrix.data[i+2];
     //Alpha
     //    imgMatrix.data[i+3] = 230;
-    //console.log("Imgmatrix data vale: " + imgMatrix.data[i]);
-    
+    //console.log("Imgmatrix data vale: " + imgMatrix.data[i])
 }
+
+
 var mySlider = $("#slider").slider();
 //Mostro le modifiche a schermo
 contex.putImageData(imgMatrix,0,0);
@@ -67,9 +72,27 @@ mySlider.on("change", function(val){
         //Alpha
         //    imgMatrix.data[i+3] = 230;
         //console.log("Imgmatrix data vale: " + imgMatrix.data[i]);
-        
     }
     contex.putImageData(imgMatrix,0,0);
     console.log(imgMatrix.data);
-
 });
+
+
+
+Fourier.saluta();
+//Parte 3
+var canvas3 = document.getElementById("imageLenaModify3");
+var grace = document.getElementById("imageLena3");
+
+var contex3 = canvas3.getContext("2d");
+//disegno l'immagine.
+contex3.drawImage(grace,0,0);
+//Prendo l'immagine per lavorarci come una matrice.
+var imgMatrix3 = contex3.getImageData(0, 0, canvas3.width, canvas3.height);
+for (i = 0; i < imgData.data.length; i += 4) {
+    imgMatrix3.data[i] = 255 - imgMatrix3.data[i];
+    imgMatrix3.data[i+1] = 255 - imgMatrix3.data[i+1];
+    imgMatrix3.data[i+2] = 255 - imgMatrix3.data[i+2];
+    imgMatrix3.data[i+3] = 255;
+  }
+contex3.putImageData(imgMatrix3,0,0);
