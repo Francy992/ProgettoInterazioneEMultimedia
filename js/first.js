@@ -89,10 +89,34 @@ var contex3 = canvas3.getContext("2d");
 contex3.drawImage(grace,0,0);
 //Prendo l'immagine per lavorarci come una matrice.
 var imgMatrix3 = contex3.getImageData(0, 0, canvas3.width, canvas3.height);
-for (i = 0; i < imgData.data.length; i += 4) {
+for (i = 0; i < imgMatrix3.data.length; i += 4) {
     imgMatrix3.data[i] = 255 - imgMatrix3.data[i];
     imgMatrix3.data[i+1] = 255 - imgMatrix3.data[i+1];
     imgMatrix3.data[i+2] = 255 - imgMatrix3.data[i+2];
     imgMatrix3.data[i+3] = 255;
   }
-contex3.putImageData(imgMatrix3,0,0);
+  var h_hats = [];
+  var h_es = []; // the h values
+    for (var ai = 0; ai < imgMatrix3.data.length; ai+=4) {
+        // greyscale, so you only need every 4th value
+        h_es.push(imgMatrix3.data[ai]);
+    }
+  var h =  h = function(n, m) {
+    if (arguments.length === 0) return h_es;
+
+    var idx = n*dims[0] + m;
+    return h_es[idx];}
+  Fourier.transform(h(), h_hats);
+  console.log(h_hats);
+
+  var h_primes = [];
+  var h_hats = h();
+  var dims = [256,256];
+  h_hats = Fourier.unshift(h_hats, dims);
+  Fourier.invert(h_hats, h_primes);
+
+
+
+
+  //h_hats = Fourier.shift(h_hats, dims);
+contex3.putImageData(h_hats,0,0);

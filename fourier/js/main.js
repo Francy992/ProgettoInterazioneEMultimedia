@@ -196,7 +196,9 @@ var FourierImageAnalysis = (function() {
     // compute the h prime values
     var h_primes = [];
     var h_hats = $h();
+    console.log("Dims nell'antitrasformata vale:" + dims);
     h_hats = Fourier.unshift(h_hats, dims);
+
     Fourier.invert(h_hats, h_primes);
  
     // store them in a nice function to match the math
