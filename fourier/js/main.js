@@ -34,7 +34,7 @@ var FourierImageAnalysis = (function() {
     });
 
     $s('#draw-grace-btn').addEventListener('click', function() {
-      loadImage('grace.png');
+      loadImage('lena.jpg');
     });
 
     $s('#draw-img-btn').addEventListener('click', function() {
@@ -131,7 +131,7 @@ var FourierImageAnalysis = (function() {
         );
       });
       //img.crossOrigin = "anonymous";
-      img.src = "grace.png";
+      img.src = "lena.jpg";
     });
   }
   
