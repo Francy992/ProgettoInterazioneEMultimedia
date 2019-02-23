@@ -1,8 +1,24 @@
+//Sezione inizializzazione
+var start = new Date();
+
+//Vari livelli dell'immagine. Soltanto i valori, è un array e non un'immagine.
+var redLevel = [];
+var greenLevel = [];
+var blueLevel = [];
+//Matrice contenente tutti i valori dei vari livelli della trasformata (non è un'immagine e contiene i complessi)
+var MatrixFourierRedLevel = [];
+var MatrixFourierGreenLevel = [];
+var MatrixFourierBlueLevel = [];
+//Matrice contenente tutti i valori dei vari livelli dell'antitrasformata (non è un'immagine e contiene i valori da 0 a 255)
+var AntiTrasformateRedLevel = [];
+var AntiTrasformateGreenLevel = [];
+var AntiTrasformateBlueLevel = [];
+//Immagine originale e variabile dimensioni globale.
+var imgRiga1 = document.getElementById("imgRiga1");
+var dims = [imgRiga1.width,imgRiga1.height];
+
 Fourier.saluta();
 //Creo le variabili canvas, imagine e context
-var imgRiga1 = document.getElementById("imgRiga1");
-
-var dims = [imgRiga1.width,imgRiga1.height];
 
 var canvasRiga1 = document.getElementById("canvasRiga1");
 var contextRiga1 = canvasRiga1.getContext("2d");
@@ -26,30 +42,90 @@ var imgMatrix3 = contextRiga1.getImageData(0, 0, imgRiga1.width, imgRiga1.height
 redLevel = getLevel(imgMatrix3, 0);
 greenLevel = getLevel(imgMatrix3, 1);
 blueLevel = getLevel(imgMatrix3, 2);
-imgMatrixOriginal = makeImage(redLevel,greenLevel,blueLevel);
+//imgMatrixOriginal = makeImage(redLevel,greenLevel,blueLevel);
 //imgMatrixOriginalInvers = coloriInvertiti(imgMatrixOriginal);
-console.log("RedLevel contiente " + redLevel.length + " elementi.");
-console.log(redLevel);
-imgLogMagnitude22 = getLog(imgMatrix3);
-console.log(imgLogMagnitude22);
+//console.log("RedLevel contiente " + redLevel.length + " elementi.");
+//console.log(redLevel);
+imgTrasformateRed = getTrasformate(redLevel, MatrixFourierRedLevel, 0);
+imgTrasformateGreen = getTrasformate(greenLevel, MatrixFourierGreenLevel, 1);
+imgTrasformateBlue = getTrasformate(blueLevel, MatrixFourierBlueLevel, 2);
+
+//console.log(imgTrasformate);
 //scrivo la matrice modificata nel canvas
-console.log(imgMatrixOriginal);
-contextRiga1.putImageData(imgMatrix3, 0, 0);
-context1Riga2.putImageData(imgLogMagnitude22, 0,0);
-//context2Riga2.putImageData(imgMatrixOriginal, 0,0);
+//console.log(imgMatrixOriginal);
+//console.log("Matrice della trasformata");
+//console.log(MatrixFourierRedLevel);
+//contextRiga1.putImageData(imgMatrix3, 0, 0);
+context1Riga2.putImageData(imgTrasformateRed, 0,0);
 
+AntiTrasformateRedLevel = getAntiTrasformate(MatrixFourierRedLevel, 0);
+AntiTrasformateGreenLevel = getAntiTrasformate(MatrixFourierGreenLevel, 1);
+AntiTrasformateBlueLevel = getAntiTrasformate(MatrixFourierBlueLevel, 2);
+//console.log("Red level nel main:");
+//console.log(AntiTrasformateRedLevel);
+//console.log("Green level nel main:");
+//console.log(AntiTrasformateGreenLevel);
+var imgFinal = makeImage(AntiTrasformateRedLevel, AntiTrasformateGreenLevel, AntiTrasformateBlueLevel);
+//console.log(imgFinal)
+context2Riga2.putImageData(imgFinal, 0,0);
 
-function getLog(imgMatrix){
+//Durata
+var duration = +new Date() - start;
+console.log('It took '+duration+'ms to compute the FT.');
+
+function getAntiTrasformate(imgMatrixTrasformate, colorLevel){
+    var h_primes = [];
+    var $h = function(k, l) {
+      if (arguments.length === 0) return h_hats;
+  
+      var idx = k*dims[0] + l;
+      return h_hats[idx];
+    };
+ 
+    var h_hats = imgMatrixTrasformate;
+    //console.log("Dims nell'antitrasformata vale:" + dims);
+    //console.log(imgMatrixTrasformate)
+    //console.log("Prima di unshift");
+    h_hats = Fourier.unshift(h_hats, dims);
+    //console.log("Prima di invert");
+    Fourier.invert(h_hats, h_primes);
+    // store them in a nice function to match the math
+    h_ = function(n, m) {
+      if (arguments.length === 0) return h_primes;
+ 
+      var idx = n*dims[0] + m;
+      return Math.round(h_primes[idx], 2);
+    };
+ 
+    // draw the pixels
+    imgMatrix2 = [];
+     var xxx = 0;
+    for (var n = 0; n < dims[1]; n++) {
+      for (var m = 0; m < dims[0]; m++) {
+        var idxInPixels = (dims[0]*n + m);
+        imgMatrix2[idxInPixels] = h_(n, m);
+      }
+    }
+    //console.log("Dentro antitrasformate: " + xxx);
+    //console.log(imgMatrix2);
+    //ctxs[2].putImageData(imgMatrix2, 0, 0);
+    return imgMatrix2;
+}
+
+function getTrasformate(imgMatrix, h_hats, colorLevel){
     var h_hats = [];
     var h_es = []; // the h values
 
     var cc = 9e-3; // contrast constant
 
 
-    for (var ai = 0; ai < imgMatrix.data.length; ai+=4) {
+    /*for (var ai = 0; ai < imgMatrix.data.length; ai+=4) {
         // greyscale, so you only need every 4th value
         h_es.push(imgMatrix.data[ai]);
-    }
+    }*/
+
+    h_es = imgMatrix;
+    
     var h = h = function(n, m) {
         if (arguments.length === 0) 
             return h_es;
@@ -58,7 +134,13 @@ function getLog(imgMatrix){
         return h_es[idx];
     }
     Fourier.transform(h(), h_hats);
-    h_hats = Fourier.shift(h_hats, dims);
+    if(colorLevel == 0)
+      MatrixFourierRedLevel = h_hats = Fourier.shift(h_hats, dims);
+    else if(colorLevel == 1)
+      MatrixFourierGreenLevel = h_hats = Fourier.shift(h_hats, dims);
+    else if(colorLevel == 2)
+     MatrixFourierBlueLevel = h_hats = Fourier.shift(h_hats, dims);
+
     //console.log(h_hats);
 
 
@@ -105,8 +187,6 @@ function getLog(imgMatrix){
   /**/
 }
 
-
-
 function getMagnitudeQualcosa(complex){
     //console.log(complex);
     return Math.sqrt(complex.real*complex.real + complex.imag*complex.imag);
@@ -145,12 +225,13 @@ function getLevel(imgMatrix, colorLevel){
         level[cont] = imgMatrix.data[i + colorLevel];
         cont++;
     }
-    console.log("Estratto colore N° " + colorLevel);
+    //console.log("Estratto colore N° " + colorLevel);
     return level;
 }
 
 function makeImage(redLevel, greenLevel, blueLevel){
-    imgMatrix = new ImageData(512,512);
+  //console.log("Red level vale: " ); console.log(redLevel.length)
+    imgMatrix = new ImageData(dims[0],dims[1]);
     var cont = 0;
     for (i = 0; i < redLevel.length * 4; i += 4) {
         imgMatrix.data[i] = redLevel[cont];
@@ -159,6 +240,23 @@ function makeImage(redLevel, greenLevel, blueLevel){
         imgMatrix.data[i+3] = 255;
         cont++;
     }
-    console.log("Alla fine cont vale: " + cont)
+    //console.log("Alla fine cont vale: " + cont)
+    return imgMatrix;
+}
+
+function makeImageFromAntitrasformate(redLevel, greenLevel, blueLevel){
+  //console.log("Red level vale: " ); 
+  //console.log(redLevel);console.log(greenLevel);console.log(blueLevel)
+  imgMatrix = new ImageData(dims[0],dims[1]);
+  var cont = 0;
+  for (i = 0; i < dims[0] * dims[1] * 4; i += 4) {
+        imgMatrix.data[i] = redLevel[i];
+        imgMatrix.data[i+1] = greenLevel[i+1];
+        imgMatrix.data[i+2] = blueLevel[i+2];
+        imgMatrix.data[i+3] = 255;
+        cont++;
+    }
+    //console.log("Alla fine cont vale: " + cont)
+    imgMatrix = redLevel;
     return imgMatrix;
 }
