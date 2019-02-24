@@ -59,66 +59,50 @@ imgTrasformateBlue = getTrasformate(blueLevel, MatrixFourierBlueLevel, 2);
 //contextRiga1.putImageData(imgMatrix3, 0, 0);
 context1Riga2.putImageData(imgTrasformateRed, 0,0);
 
-AntiTrasformateRedLevel = getAntiTrasformate(MatrixFourierRedLevel, MatrixFourierGreenLevel, MatrixFourierBlueLevel, 0);
-//AntiTrasformateGreenLevel = getAntiTrasformate(MatrixFourierGreenLevel, 1);
-//AntiTrasformateBlueLevel = getAntiTrasformate(MatrixFourierBlueLevel, 2);
-//var imgFinal = makeImage(AntiTrasformateRedLevel, AntiTrasformateGreenLevel, AntiTrasformateBlueLevel);
+AntiTrasformateRedLevel = getAntiTrasformate(MatrixFourierRedLevel, 0);
+AntiTrasformateGreenLevel = getAntiTrasformate(MatrixFourierGreenLevel, 1);
+AntiTrasformateBlueLevel = getAntiTrasformate(MatrixFourierBlueLevel, 2);
+var imgFinal = makeImage(AntiTrasformateRedLevel, AntiTrasformateGreenLevel, AntiTrasformateBlueLevel);
 
 
-context2Riga2.putImageData(AntiTrasformateRedLevel, 0,0);
+context2Riga2.putImageData(imgFinal, 0,0);
 
 //Durata
 var duration = +new Date() - start;
 console.log("Durata timer globale: " + duration);
 
-function getAntiTrasformate(matrixFourierRedColor, matrixFourierGreenColor, matrixFourierBlueColor, colorLevel){
+function getAntiTrasformate(matrixFourierColorLevel, colorLevel){
   var start = new Date();
   console.log("Avviato timer get ANTI trasformate");
 
-    var h_primesRedColor = [], h_primesGreenColor = [], h_primesBlueColor = [];
-    var h_redColor = matrixFourierRedColor, h_greenColor = matrixFourierGreenColor, h_blueColor = matrixFourierBlueColor;
+    var h_primes = [];
+    var $h = function(k, l) {
+      if (arguments.length === 0) return h_hats;
   
-    h_redColor = Fourier.unshift(h_redColor, dims);
-    h_greenColor = Fourier.unshift(h_greenColor, dims);
-    h_blueColor = Fourier.unshift(h_blueColor, dims);
-
+      var idx = k*dims[0] + l;
+      return h_hats[idx];
+    };
+ 
+    var h_hats = matrixFourierColorLevel;
+  
+    h_hats = Fourier.unshift(h_hats, dims);
     //console.log("Prima di invert");
-    Fourier.invert(h_redColor, h_primesRedColor);
-    Fourier.invert(h_greenColor, h_primesGreenColor);
-    Fourier.invert(h_blueColor, h_primesBlueColor);
-
+    Fourier.invert(h_hats, h_primes);
     // store them in a nice function to match the math
-    h_FunctionRedColor = function(n, m) {
-      if (arguments.length === 0) return h_primesRedColor;
+    h_ = function(n, m) {
+      if (arguments.length === 0) return h_primes;
  
       var idx = n*dims[0] + m;
-      return Math.round(h_primesRedColor[idx], 2);
-    };
-
-    h_FunctionGreenColor = function(n, m) {
-      if (arguments.length === 0) return h_primesGreenColor;
- 
-      var idx = n*dims[0] + m;
-      return Math.round(h_primesGreenColor[idx], 2);
-    };
-
-    h_FunctionBlueColor = function(n, m) {
-      if (arguments.length === 0) return h_primesBlueColor;
- 
-      var idx = n*dims[0] + m;
-      return Math.round(h_primesBlueColor[idx], 2);
+      return Math.round(h_primes[idx], 2);
     };
  
     // draw the pixels
-    imgMatrix2 = new ImageData(dims[0], dims[1]);
+    imgMatrix2 = [];
      var xxx = 0;
     for (var n = 0; n < dims[1]; n++) {
       for (var m = 0; m < dims[0]; m++) {
         var idxInPixels = (dims[0]*n + m);
-        imgMatrix2.data[idxInPixels] = h_FunctionRedColor(n, m);
-        imgMatrix2.data[idxInPixels+1] = h_FunctionGreenColor(n, m);
-        imgMatrix2.data[idxInPixels+2] = h_FunctionBlueColor(n, m);
-        imgMatrix2.data[idxInPixels+3] = 255;
+        imgMatrix2[idxInPixels] = h_(n, m);
       }
     }
     //console.log("Dentro antitrasformate: " + xxx);
@@ -280,6 +264,8 @@ function getLevel(imgMatrix, colorLevel){
 
 function makeImage(redLevel, greenLevel, blueLevel){
   //console.log("Red level vale: " ); console.log(redLevel.length)
+    var start = new Date();
+    console.log("Avviato makeImageFunction.");
     imgMatrix = new ImageData(dims[0],dims[1]);
     var cont = 0;
     for (i = 0; i < redLevel.length * 4; i += 4) {
@@ -290,6 +276,8 @@ function makeImage(redLevel, greenLevel, blueLevel){
         cont++;
     }
     //console.log("Alla fine cont vale: " + cont)
+    var duration = +new Date() - start;
+    console.log("Dentro makeImageFunction, è durata: " + duration);
     return imgMatrix;
 }
 
