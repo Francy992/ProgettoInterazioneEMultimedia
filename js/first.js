@@ -10,6 +10,13 @@ var blueLevel = [];
 var MatrixFourierRedLevel = [];
 var MatrixFourierGreenLevel = [];
 var MatrixFourierBlueLevel = [];
+
+//Matrice contenente tutti i valori complessi dopo il filtraggio passaQualcosa
+var redLevelAfterFilter = [];
+var greenLevelAfterFilter = [];
+var blueLevelAfterFilter = [];
+
+
 //Matrice contenente tutti i valori dei vari livelli dell'antitrasformata (non è un'immagine e contiene i valori da 0 a 255)
 var AntiTrasformateRedLevel = [];
 var AntiTrasformateGreenLevel = [];
@@ -52,20 +59,87 @@ blueLevel = getLevel(imgMatrix3, 2);
 //imgMatrixOriginal = makeImage(redLevel,greenLevel,blueLevel);
 //imgMatrixOriginalInvers = coloriInvertiti(imgMatrixOriginal);
 
-imgTrasformateRed = getTrasformate(redLevel, MatrixFourierRedLevel, 0);
-imgTrasformateGreen = getTrasformate(greenLevel, MatrixFourierGreenLevel, 1);
-imgTrasformateBlue = getTrasformate(blueLevel, MatrixFourierBlueLevel, 2);
+//imgTrasformateRed = getTrasformate(redLevel, MatrixFourierRedLevel, 0);
+//imgTrasformateGreen = getTrasformate(greenLevel, MatrixFourierGreenLevel, 1);
+//imgTrasformateBlue = getTrasformate(blueLevel, MatrixFourierBlueLevel, 2);
 
 //contextRiga1.putImageData(imgMatrix3, 0, 0);
-context1Riga2.putImageData(imgTrasformateRed, 0,0);
+//context1Riga2.putImageData(imgTrasformateRed, 0,0);
 
-AntiTrasformateRedLevel = getAntiTrasformate(MatrixFourierRedLevel, 0);
-AntiTrasformateGreenLevel = getAntiTrasformate(MatrixFourierGreenLevel, 1);
-AntiTrasformateBlueLevel = getAntiTrasformate(MatrixFourierBlueLevel, 2);
-var imgFinal = makeImage(AntiTrasformateRedLevel, AntiTrasformateGreenLevel, AntiTrasformateBlueLevel);
+//AntiTrasformateRedLevel = getAntiTrasformate(MatrixFourierRedLevel, 0);
+//AntiTrasformateGreenLevel = getAntiTrasformate(MatrixFourierGreenLevel, 1);
+//AntiTrasformateBlueLevel = getAntiTrasformate(MatrixFourierBlueLevel, 2);
+//var imgFinal = makeImage(AntiTrasformateRedLevel, AntiTrasformateGreenLevel, AntiTrasformateBlueLevel);
+//context2Riga2.putImageData(imgFinal, 0,0);
+
+/***
+ * 
+ * PROVA NUOVAFFT.js
+ * 
+ */
+  //console.log(redLevel);
+  //matrixFourierRedLevel = callCfft(redLevel);
+  //console.log(redLevel)
+  //matrixFourierRedLevel = callICfft(redLevel);
+  //console.log(redLevel)
+
+  callCfft(redLevel);callCfft(greenLevel);callCfft(blueLevel);
+  console.log("GreenLevel complesso");
+  //console.log(greenLevel);
+//TODO: forse maxMagnitude proboca problemi in quanto mi modifica erroneamente il redLevel.
+  //var imgMatrixMagnitude = getMagnitudeMatrixOneLevel(redLevel);
+  //console.log(imgMatrixMagnitude);
+  //context1Riga2.putImageData(imgMatrixMagnitude, 0,0);
+  
+  //filtro passa qualcosa.
+  redLevelAfterFilter = filterLowPass(redLevel,dims,360);
+  blueLevelAfterFilter = filterLowPass(blueLevel,dims,360);
+  greenLevelAfterFilter = filterLowPass(greenLevel,dims,360);
+  console.log("greenLevelAfterFilter prima della inverseFFT");
+  console.log(greenLevelAfterFilter);
+  getMax(greenLevelAfterFilter);
+  getMix(greenLevelAfterFilter);
+  callICfft(redLevelAfterFilter);callICfft(greenLevelAfterFilter);callICfft(blueLevelAfterFilter);
+  console.log("greenLevelAfterFilter dopo la inverseFFT");
+  console.log(greenLevelAfterFilter);
+  getMax(greenLevelAfterFilter);
+  getMix(greenLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
 
 
-context2Riga2.putImageData(imgFinal, 0,0);
+  function getMax(array){
+    var max = -9911111111111;
+    for(var i=0; i<array.length; i++){
+      if(array[i]>max)
+        max=array[i];
+    }
+    console.log("Il massimo è: " + max);
+  }
+
+  function getMix(array){
+    var min = +99911111111111;
+    for(var i=0; i<array.length; i++){
+      if(array[i]<min)
+      min=array[i];
+    }
+    console.log("Il min è: " + min);
+  }
+
+  //callICfft(redLevel);callICfft(greenLevel);callICfft(blueLevel);
+  console.log(greenLevel);
+  //var imgFinal = makeImage(redLevel, greenLevel, blueLevel); 
+  
+ // console.log(redLevelAfterFilter);
+  context2Riga2.putImageData(imgFinal, 0,0);
+
+
+
+/***
+ * 
+ * FINE PROVA
+ * 
+ */
+
 
 //Durata
 var duration = +new Date() - start;
@@ -220,19 +294,44 @@ for (var k = 0; k < dims[1]; k++) {
 
 */
 
-function getMagnitudeQualcosa(complex){
+
+
+function getMagnitudeMatrixOneLevel(complexMatrix) {
     //console.log(complex);
-    return Math.sqrt(complex.real*complex.real + complex.imag*complex.imag);
+    var cc = 9e-3; // contrast constant
+
+    imgMatrixMagnitude = new ImageData(dims[0], dims[1]);
+    //Massimo magnitudo per normalizzare i valori:
+    var maxMagnitude = getMaxMagnitude(complexMatrix);
+    console.log("Max magnitude vale: " + maxMagnitude);
+    for (var k = 0; k < dims[1]; k++) {
+      for (var l = 0; l < dims[0]; l++) {
+        var idxInPixels = 4*(dims[0]*k + l);
+        sqrt =  Math.log(cc*getMagnitude(complexMatrix[k*dims[0] + l])+1);
+        sqrt = Math.trunc(255*(sqrt/maxMagnitude));
+        imgMatrixMagnitude.data[idxInPixels] = sqrt; 
+        imgMatrixMagnitude.data[idxInPixels+1] = sqrt;
+        imgMatrixMagnitude.data[idxInPixels+2] = sqrt;
+        imgMatrixMagnitude.data[idxInPixels+3] = 255;//alpha channel
+      }
+    }
+   return imgMatrixMagnitude;  
+}
+
+function getMagnitude(complex){
+  return Math.sqrt(complex.re*complex.re + complex.im*complex.im);
 }
 
 function getMaxMagnitude(imgMatrixFrequenceDomain){
     var maxMagnitude = 0;
+    var cc = 9e-3; // contrast constant
     for (var ai = 0; ai < imgMatrixFrequenceDomain.length; ai++) {
-      var mag = imgMatrixFrequenceDomain[ai].magnitude();
+      var mag = getMagnitude(imgMatrixFrequenceDomain[ai]);
       if (mag > maxMagnitude) {
         maxMagnitude = mag;
       }
     }
+    return Math.log(cc*maxMagnitude+1);
 }
 
 function coloriInvertiti(imgMatrix){
