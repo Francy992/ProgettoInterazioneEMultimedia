@@ -106,21 +106,28 @@ function cfft(amplitudes)
 }
 function callCfft(amplitudes){
     var start = new Date();
-    console.log("Avviato CallCfft.");
+		console.log("Avviato CallCfft.");
     cfft(amplitudes);
+    console.log("Prima dello shift");
+		//console.log(amplitudes);
+		amplitudes = shiftFFT(amplitudes, [512,512]);
+		//console.log(amplitudes);
     var duration = +new Date() - start;
     console.log("Dentro callCfft, è durata: " + duration);
+    return amplitudes;
 }
 
 function callICfft(amplitudes){
     var start = new Date();
     console.log("Avviato inverse CallCfft.");
+    amplitudes = unshiftFFT(amplitudes, [512,512]);
     icfft(amplitudes);
     for(var i = 0; i < amplitudes.length; i++){
         amplitudes[i]= Math.trunc(amplitudes[i].re);
-    }
+		}
     var duration = +new Date() - start;
     console.log("Dentro  inverse callCfft, è durata: " + duration);
+    return amplitudes;
 }
  
 
@@ -152,8 +159,8 @@ function filterLowPass(amplitudes, dims, lowPass) {
 
 
 function filter(amplitudes, dims, lowPass, highPass) {
-    var lowPassSq = Math.pow(240, 2);
-    var highPassSq = Math.pow(270, 2);
+    var lowPassSq = Math.pow(lowPass, 2);
+    var highPassSq = Math.pow(highPass, 2);
     var N = dims[1];
     var M = dims[0];
     var newArray = [];
@@ -169,10 +176,79 @@ function filter(amplitudes, dims, lowPass, highPass) {
         ) {
             newArray[idx] = new Complex(0, 0);
         }
-        else newArray[idx] = amplitudes[idx];
+        else newArray[idx] =  new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
       }
     }
     return newArray;
+  }
+
+
+
+	
+	function shiftFFT(transform, dims) {
+    return flipRightHalf(
+      halfShiftFFT(
+        halfShiftFFT(
+          transform,
+          dims
+        ),
+        dims
+      ),
+      dims
+    );
+  }
+
+  function unshiftFFT(transform, dims) {
+    return halfShiftFFT(
+      halfShiftFFT(
+        flipRightHalf(
+          transform,
+          dims
+        ),
+        dims
+      ),
+      dims
+    );
+  }
+
+  function halfShiftFFT(transform, dims) {
+    var ret = [];
+    var N = dims[1];
+    var M = dims[0];
+    var m = 0;
+    var idx = 0;
+    for (var n = 0, vOff = N/2; n < N; n++) {
+      for (m = 0; m < M/2; m++) {
+        idx = vOff*dims[0] + m;
+        ret.push(transform[idx]);
+      }
+      vOff += vOff >= N/2 ? -N/2 : (N/2)+1;
+    }
+    for (n = 0, vOff = N/2; n < N; n++) {
+      for (m = M/2; m < M; m++) {
+        idx = vOff*dims[0] + m;
+        ret.push(transform[idx]);
+      }
+      vOff += vOff >= N/2 ? -N/2 : (N/2)+1;
+    }
+    return ret;
+  }
+
+  function flipRightHalf(transform, dims) {
+    var ret = [];
+  
+    // flip the right half of the image across the x axis
+    var N = dims[1];
+    var M = dims[0];
+    for (var n = 0; n < N; n++) {
+      for (var m = 0; m < M; m++) {
+        var $n = m < M/2 ? n : (N-1)-n;
+        var idx = $n*dims[0] + m;
+        ret.push(transform[idx]);
+      }
+    }
+  
+    return ret;
   }
 
 

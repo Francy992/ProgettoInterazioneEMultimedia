@@ -83,23 +83,27 @@ blueLevel = getLevel(imgMatrix3, 2);
   //matrixFourierRedLevel = callICfft(redLevel);
   //console.log(redLevel)
 
-  callCfft(redLevel);callCfft(greenLevel);callCfft(blueLevel);
-  console.log("GreenLevel complesso");
-  //console.log(greenLevel);
+  redLevel = callCfft(redLevel);
+  greenLevel = callCfft(greenLevel);
+  blueLevel = callCfft(blueLevel);
+  console.log("Red level complesso, invertito");
+  console.log(redLevel);
 //TODO: forse maxMagnitude proboca problemi in quanto mi modifica erroneamente il redLevel.
   //var imgMatrixMagnitude = getMagnitudeMatrixOneLevel(redLevel);
   //console.log(imgMatrixMagnitude);
   //context1Riga2.putImageData(imgMatrixMagnitude, 0,0);
   
   //filtro passa qualcosa.
-  redLevelAfterFilter = filterLowPass(redLevel,dims,360);
-  blueLevelAfterFilter = filterLowPass(blueLevel,dims,360);
-  greenLevelAfterFilter = filterLowPass(greenLevel,dims,360);
+  redLevelAfterFilter = filter(redLevel,dims,20,NaN);
+  blueLevelAfterFilter = filter(blueLevel,dims,20,NaN);
+  greenLevelAfterFilter = filter(greenLevel,dims,20,NaN);
   console.log("greenLevelAfterFilter prima della inverseFFT");
   console.log(greenLevelAfterFilter);
   getMax(greenLevelAfterFilter);
   getMix(greenLevelAfterFilter);
-  callICfft(redLevelAfterFilter);callICfft(greenLevelAfterFilter);callICfft(blueLevelAfterFilter);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
   console.log("greenLevelAfterFilter dopo la inverseFFT");
   console.log(greenLevelAfterFilter);
   getMax(greenLevelAfterFilter);
