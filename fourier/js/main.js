@@ -79,12 +79,14 @@ var FourierImageAnalysis = (function() {
     });
  
     // initialize the working variables
-    canvases = [], ctxs = [];
+    canvases = [];
+    ctxs = [];
     h = $h = h_ = function() { return false; };
   }
 
   function loadImage(loc) {
     var start = +new Date();
+    var ai;
  		console.log(loc);
 
     // placed in a callback so the UI has a chance to update
@@ -110,7 +112,7 @@ var FourierImageAnalysis = (function() {
         // grab the pixels
         var imageData = ctxs[0].getImageData(0, 0, dims[0], dims[1]);
         var h_es = []; // the h values
-        for (var ai = 0; ai < imageData.data.length; ai+=4) {
+        for (ai = 0; ai < imageData.data.length; ai+=4) {
           // greyscale, so you only need every 4th value
           h_es.push(imageData.data[ai]);
         }
@@ -236,9 +238,10 @@ var FourierImageAnalysis = (function() {
     // find the range of the errors
     var minError = Infinity;
     var maxError = 0;
-    for (var n = 0; n < dims[1]; n++) {
-      for (var m = 0; m < dims[0]; m++) {
-        var error = h_(n, m) - h(n, m);
+    var n, m, error;
+    for (n = 0; n < dims[1]; n++) {
+      for (m = 0; m < dims[0]; m++) {
+        error = h_(n, m) - h(n, m);
         if (error < minError) minError = error;
         if (error > maxError) maxError = error;
       }
@@ -248,10 +251,10 @@ var FourierImageAnalysis = (function() {
     var currImageData = ctxs[3].getImageData(
       0, 0, dims[0], dims[1]
     );
-    for (var n = 0; n < dims[1]; n++) {
-      for (var m = 0; m < dims[0]; m++) {
+    for (n = 0; n < dims[1]; n++) {
+      for (m = 0; m < dims[0]; m++) {
         var idxInPixels = 4*(dims[0]*n + m);
-        var error = h_(n, m) - h(n, m);
+        error = h_(n, m) - h(n, m);
         var color = getCoolColor(
           error, [minError, maxError]
         );

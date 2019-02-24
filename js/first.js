@@ -1,5 +1,6 @@
 //Sezione inizializzazione
 var start = new Date();
+console.log("Avviato timer GLOBALE");
 
 //Vari livelli dell'immagine. Soltanto i valori, è un array e non un'immagine.
 var redLevel = [];
@@ -17,7 +18,7 @@ var AntiTrasformateBlueLevel = [];
 var imgRiga1 = document.getElementById("imgRiga1");
 var dims = [imgRiga1.width,imgRiga1.height];
 
-Fourier.saluta();
+//Fourier.saluta();
 //Creo le variabili canvas, imagine e context
 
 var canvasRiga1 = document.getElementById("canvasRiga1");
@@ -58,48 +59,66 @@ imgTrasformateBlue = getTrasformate(blueLevel, MatrixFourierBlueLevel, 2);
 //contextRiga1.putImageData(imgMatrix3, 0, 0);
 context1Riga2.putImageData(imgTrasformateRed, 0,0);
 
-AntiTrasformateRedLevel = getAntiTrasformate(MatrixFourierRedLevel, 0);
-AntiTrasformateGreenLevel = getAntiTrasformate(MatrixFourierGreenLevel, 1);
-AntiTrasformateBlueLevel = getAntiTrasformate(MatrixFourierBlueLevel, 2);
-var imgFinal = makeImage(AntiTrasformateRedLevel, AntiTrasformateGreenLevel, AntiTrasformateBlueLevel);
+AntiTrasformateRedLevel = getAntiTrasformate(MatrixFourierRedLevel, MatrixFourierGreenLevel, MatrixFourierBlueLevel, 0);
+//AntiTrasformateGreenLevel = getAntiTrasformate(MatrixFourierGreenLevel, 1);
+//AntiTrasformateBlueLevel = getAntiTrasformate(MatrixFourierBlueLevel, 2);
+//var imgFinal = makeImage(AntiTrasformateRedLevel, AntiTrasformateGreenLevel, AntiTrasformateBlueLevel);
 
 
-context2Riga2.putImageData(imgFinal, 0,0);
+context2Riga2.putImageData(AntiTrasformateRedLevel, 0,0);
 
 //Durata
 var duration = +new Date() - start;
-console.log('It took '+duration+'ms to compute the FT.');
+console.log("Durata timer globale: " + duration);
 
-function getAntiTrasformate(imgMatrixTrasformate, colorLevel){
+function getAntiTrasformate(matrixFourierRedColor, matrixFourierGreenColor, matrixFourierBlueColor, colorLevel){
   var start = new Date();
-    var h_primes = [];
-    var $h = function(k, l) {
-      if (arguments.length === 0) return h_hats;
+  console.log("Avviato timer get ANTI trasformate");
+
+    var h_primesRedColor = [], h_primesGreenColor = [], h_primesBlueColor = [];
+    var h_redColor = matrixFourierRedColor, h_greenColor = matrixFourierGreenColor, h_blueColor = matrixFourierBlueColor;
   
-      var idx = k*dims[0] + l;
-      return h_hats[idx];
-    };
- 
-    var h_hats = imgMatrixTrasformate;
-  
-    h_hats = Fourier.unshift(h_hats, dims);
+    h_redColor = Fourier.unshift(h_redColor, dims);
+    h_greenColor = Fourier.unshift(h_greenColor, dims);
+    h_blueColor = Fourier.unshift(h_blueColor, dims);
+
     //console.log("Prima di invert");
-    Fourier.invert(h_hats, h_primes);
+    Fourier.invert(h_redColor, h_primesRedColor);
+    Fourier.invert(h_greenColor, h_primesGreenColor);
+    Fourier.invert(h_blueColor, h_primesBlueColor);
+
     // store them in a nice function to match the math
-    h_ = function(n, m) {
-      if (arguments.length === 0) return h_primes;
+    h_FunctionRedColor = function(n, m) {
+      if (arguments.length === 0) return h_primesRedColor;
  
       var idx = n*dims[0] + m;
-      return Math.round(h_primes[idx], 2);
+      return Math.round(h_primesRedColor[idx], 2);
+    };
+
+    h_FunctionGreenColor = function(n, m) {
+      if (arguments.length === 0) return h_primesGreenColor;
+ 
+      var idx = n*dims[0] + m;
+      return Math.round(h_primesGreenColor[idx], 2);
+    };
+
+    h_FunctionBlueColor = function(n, m) {
+      if (arguments.length === 0) return h_primesBlueColor;
+ 
+      var idx = n*dims[0] + m;
+      return Math.round(h_primesBlueColor[idx], 2);
     };
  
     // draw the pixels
-    imgMatrix2 = [];
+    imgMatrix2 = new ImageData(dims[0], dims[1]);
      var xxx = 0;
     for (var n = 0; n < dims[1]; n++) {
       for (var m = 0; m < dims[0]; m++) {
         var idxInPixels = (dims[0]*n + m);
-        imgMatrix2[idxInPixels] = h_(n, m);
+        imgMatrix2.data[idxInPixels] = h_FunctionRedColor(n, m);
+        imgMatrix2.data[idxInPixels+1] = h_FunctionGreenColor(n, m);
+        imgMatrix2.data[idxInPixels+2] = h_FunctionBlueColor(n, m);
+        imgMatrix2.data[idxInPixels+3] = 255;
       }
     }
     //console.log("Dentro antitrasformate: " + xxx);
@@ -107,13 +126,14 @@ function getAntiTrasformate(imgMatrixTrasformate, colorLevel){
     //ctxs[2].putImageData(imgMatrix2, 0, 0);
     var duration = +new Date() - start;
 
-    console.log("AntiTrasformata: " + duration);
+    console.log("AntiTrasformata, colore: " + colorLevel + ", durata:" + duration);
     return imgMatrix2;
 }
 
 function getTrasformate(imgMatrix, h_hats, colorLevel){
 
   var start = new Date();
+  console.log("Avviato timer getTrasformate");
     var h_es = []; // the h values
 
     var cc = 9e-3; // contrast constant
@@ -171,7 +191,10 @@ function getTrasformate(imgMatrix, h_hats, colorLevel){
     //Fourier.invert(h_hats, h_primes);
     imgMatrix2 = new ImageData(dims[0],dims[1]);
     var logOfMaxMag = Math.log(cc*maxMagnitude+1);
-    console.log("Get magnitudo: " +getMagnitudeQualcosa(h_hats[(100)])+ ", valore matrice: " + h_hats[100]);
+    //console.log(h_hats);
+    /*******************
+    *     SI POTREBBE ANCHE TOGLIERE IL CICLO SOTTO.    
+    */
     for (var k = 0; k < dims[1]; k++) {
       for (var l = 0; l < dims[0]; l++) {
         var idxInPixels = 4*(dims[0]*k + l);

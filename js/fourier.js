@@ -36,7 +36,11 @@ var Fourier = (function() {
   }
 
   function FFT(sig, out) {
+    var start = new Date();
+    console.log("Avviato timer Dentro fourier.js, FFT function");
     rec_FFT(out, 0, sig, 0, sig.length, 1);
+    var duration = +new Date() - start;
+    console.log("Dentro fourier.js, FFT function, durata:" + duration);
   }
 
   function rec_FFT(out, start, sig, offset, N, s) {
@@ -57,10 +61,14 @@ var Fourier = (function() {
   }
   
   function invFFT(transform, sig) {
+    var start = new Date();
+    console.log("Avviato timer Dentro fourier.js, invFFT function");
     rec_invFFT(sig, 0, transform, 0, transform.length, 1);
     for (var ai = 0; ai < sig.length; ai++) {
       sig[ai] = sig[ai].real/sig.length;
     }
+    var duration = +new Date() - start;
+    console.log("Dentro fourier.js, invFFT function, durata:" + duration);
   }
 
   function rec_invFFT(sig, start, transform, offset, N, s) {
@@ -110,16 +118,18 @@ var Fourier = (function() {
     var ret = [];
     var N = dims[1];
     var M = dims[0];
+    var m = 0;
+    var idx = 0;
     for (var n = 0, vOff = N/2; n < N; n++) {
-      for (var m = 0; m < M/2; m++) {
-        var idx = vOff*dims[0] + m;
+      for (m = 0; m < M/2; m++) {
+        idx = vOff*dims[0] + m;
         ret.push(transform[idx]);
       }
       vOff += vOff >= N/2 ? -N/2 : (N/2)+1;
     }
-    for (var n = 0, vOff = N/2; n < N; n++) {
-      for (var m = M/2; m < M; m++) {
-        var idx = vOff*dims[0] + m;
+    for (n = 0, vOff = N/2; n < N; n++) {
+      for (m = M/2; m < M; m++) {
+        idx = vOff*dims[0] + m;
         ret.push(transform[idx]);
       }
       vOff += vOff >= N/2 ? -N/2 : (N/2)+1;
