@@ -106,9 +106,7 @@ function cfft(amplitudes)
 }
 function callCfft(amplitudes){
     var start = new Date();
-		console.log("Avviato CallCfft.");
     cfft(amplitudes);
-    console.log("Prima dello shift");
 		//console.log(amplitudes);
 		amplitudes = shiftFFT(amplitudes, [512,512]);
 		//console.log(amplitudes);
@@ -119,7 +117,6 @@ function callCfft(amplitudes){
 
 function callICfft(amplitudes){
     var start = new Date();
-    console.log("Avviato inverse CallCfft.");
     amplitudes = unshiftFFT(amplitudes, [512,512]);
     icfft(amplitudes);
     for(var i = 0; i < amplitudes.length; i++){
@@ -143,19 +140,255 @@ function filterLowPass(amplitudes, dims, lowPass) {
       for (var l = 0; l < M; l++) {
         var idx = k*M + l;
         var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-        if (duv>d0) {
+        if (duv > d0) {
             newArray[idx] = new Complex(0, 0);
         }
         else {
             newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
-            //console.log(amplitudes[idx].re + " - " + newArray[idx].re );
         }
       }
     }
-    console.log("greenLevelAfterFilter dentro lowPassfilter dopo assegnazione");
-    console.log(newArray);
-        return newArray;
+    return newArray;
   }
+
+  function filterHighPass(amplitudes, dims, highPass) {
+    var d0 = Math.pow(highPass, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    console.log(amplitudes);
+    console.log(newArray);
+
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        if (duv < d0) {
+            newArray[idx] = new Complex(0, 0);
+        }
+        else {
+            newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
+        }
+      }
+    }
+    return newArray;
+  }
+
+  function aggiungiRumorePeriodico(amplitudes,dims, periodo){
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    var cont = 0;
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        if (duv==periodo) {
+          newArray[idx] = new Complex(500000, 500000);
+          cont++;
+        }
+        else {
+            newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
+        }
+      }
+    }
+    console.log(cont);
+    return newArray;
+  }
+
+  function eliminaRumorePeriodico(amplitudes, dims, periodo){
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        if (duv==periodo) {
+          newArray[idx] = new Complex(0, 0);
+        }
+        else {
+            newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
+        }
+      }
+    }
+    return newArray;
+  }
+
+  function filterButterworthLowPass(amplitudes, dims, cutFrequency, order) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    var cont = 0, cont2=0;
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var huv = 1/(1+(Math.pow((duv/d0),2*order)));
+        //console.log("Duv: " + duv + ", d0: " + d0 + ", huv: " + huv + ", d0+huv: ", + (d0+huv));
+        //console.log(huv);
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterButterworthHighPass(amplitudes, dims, cutFrequency, order) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    var cont = 0, cont2=0;
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var huv = 1/(1+(Math.pow((d0/duv),2*order)));
+        //console.log("Duv: " + duv + ", d0: " + d0 + ", huv: " + huv + ", d0+huv: ", + (d0+huv));
+        //console.log(huv);
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterLowPassGaussian(amplitudes, dims, cutFrequency) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    var cont = 0, cont2=0;
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var huv = Math.pow(Math.E, (-(duv*duv)/(2*d0*d0)));
+        //console.log("Duv: " + duv + ", d0: " + d0 + ", huv: " + huv + ", d0+huv: ", + (d0+huv));
+        //console.log(huv);
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterHighPassGaussian(amplitudes, dims, cutFrequency) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    var cont = 0, cont2=0;
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var huv = Math.pow(Math.E, ((2*d0*d0)/-(duv*duv)));
+        //console.log("Duv: " + duv + ", d0: " + d0 + ", huv: " + huv + ", d0+huv: ", + (d0+huv));
+        //console.log(huv);
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterIdealBandReject(amplitudes, dims, cutFrequency) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        if ( (duv > (d0 - cutFrequency/2)) && (duv < (d0 + cutFrequency/2))) {
+          newArray[idx] = new Complex(0, 0);
+        }
+        else {
+          newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
+        }
+      }
+    }
+    return newArray;
+  }
+
+  function filterButterworthBandReject(amplitudes, dims, cutFrequency, order) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var num = duv*cutFrequency;
+        var den = (duv*duv) - (d0*d0);
+        var huv = 1/(1+Math.pow( num/den, (2*order)));
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterGaussianBandReject(amplitudes, dims, cutFrequency) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var num =(duv*duv) - (d0*d0);
+        var den = duv*cutFrequency;
+        var tot = Math.pow((num/den),2);
+        var huv = 1 - Math.pow(Math.E, -tot);
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterGaussianBandPass(amplitudes, dims, cutFrequency) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var num =(duv*duv) - (d0*d0);
+        var den = duv*cutFrequency;
+        var tot = Math.pow((num/den),2);
+        var huv = 1 - (1 - Math.pow(Math.E, -tot));
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterAggiungiBanda(amplitudes, dims, cutFrequency) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        //var huv = Math.pow(Math.E, ((2*d0*d0)/-(duv*duv)));
+        //newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+        if ( (duv > (d0 - cutFrequency/2)) && (duv < (d0 + cutFrequency/2))) {
+          amplitudes[idx] = new Complex(1000000, 1000000);
+        }
+        else {
+          amplitudes[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
+        }
+      }
+    }
+    return amplitudes;
+  }
+
 
 
 function filter(amplitudes, dims, lowPass, highPass) {

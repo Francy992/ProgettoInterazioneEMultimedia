@@ -86,30 +86,131 @@ blueLevel = getLevel(imgMatrix3, 2);
   redLevel = callCfft(redLevel);
   greenLevel = callCfft(greenLevel);
   blueLevel = callCfft(blueLevel);
-  console.log("Red level complesso, invertito");
-  console.log(redLevel);
+
 //TODO: forse maxMagnitude proboca problemi in quanto mi modifica erroneamente il redLevel.
   //var imgMatrixMagnitude = getMagnitudeMatrixOneLevel(redLevel);
   //console.log(imgMatrixMagnitude);
   //context1Riga2.putImageData(imgMatrixMagnitude, 0,0);
   
-  //filtro passa qualcosa.
-  redLevelAfterFilter = filter(redLevel,dims,20,NaN);
-  blueLevelAfterFilter = filter(blueLevel,dims,20,NaN);
-  greenLevelAfterFilter = filter(greenLevel,dims,20,NaN);
-  console.log("greenLevelAfterFilter prima della inverseFFT");
-  console.log(greenLevelAfterFilter);
-  getMax(greenLevelAfterFilter);
-  getMix(greenLevelAfterFilter);
+ //Filtro passa basso ideale
+  /*redLevelAfterFilter = filterLowPass(redLevel,dims, 40);
+  blueLevelAfterFilter = filterLowPass(blueLevel,dims, 40);
+  greenLevelAfterFilter = filterLowPass(greenLevel,dims, 40);
   redLevelAfterFilter = callICfft(redLevelAfterFilter);
   greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
   blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
-  console.log("greenLevelAfterFilter dopo la inverseFFT");
-  console.log(greenLevelAfterFilter);
-  getMax(greenLevelAfterFilter);
-  getMix(greenLevelAfterFilter);
   var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context1Riga2.putImageData(imgFinal, 0,0);*/
 
+  //Filtro gaussiano passa basso
+  /*redLevelAfterFilter = filterLowPassGaussian(redLevel,dims, 40);
+  blueLevelAfterFilter = filterLowPassGaussian(blueLevel,dims, 40);
+  greenLevelAfterFilter = filterLowPassGaussian(greenLevel,dims, 40);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context2Riga2.putImageData(imgFinal, 0,0);*/
+
+  //Filtro passa alto ideale
+  /*redLevelAfterFilter = filterHighPass(redLevel,dims, 20);
+  blueLevelAfterFilter = filterHighPass(blueLevel,dims, 20);
+  greenLevelAfterFilter = filterHighPass(greenLevel,dims, 20);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context1Riga2.putImageData(imgFinal, 0,0);*/
+
+  /*redLevelAfterFilter = filterAggiungiBanda(redLevel,dims, 30);
+  blueLevelAfterFilter = filterAggiungiBanda(blueLevel,dims, 30);
+  greenLevelAfterFilter = filterAggiungiBanda(greenLevel,dims, 30);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context1Riga2.putImageData(imgFinal, 0,0);*/
+
+  //Filtro band reject ideale
+  redLevelAfterFilter = filterIdealBandReject(redLevel,dims, 20);
+  blueLevelAfterFilter = filterIdealBandReject(blueLevel,dims, 20);
+  greenLevelAfterFilter = filterIdealBandReject(greenLevel,dims, 20);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  contextRiga1.putImageData(imgFinal, 0,0);
+
+    //Filtro band reject Butterworth
+  redLevelAfterFilter = filterButterworthBandReject(redLevel,dims, 20, 2);
+  blueLevelAfterFilter = filterButterworthBandReject(blueLevel,dims, 20, 2);
+  greenLevelAfterFilter = filterButterworthBandReject(greenLevel,dims, 20, 2);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context1Riga2.putImageData(imgFinal, 0,0);
+
+   //Filtro band reject GAUSSIANO
+   redLevelAfterFilter = filterGaussianBandPass(redLevel,dims, 20);
+   blueLevelAfterFilter = filterGaussianBandPass(blueLevel,dims, 20);
+   greenLevelAfterFilter = filterGaussianBandPass(greenLevel,dims, 20);
+   redLevelAfterFilter = callICfft(redLevelAfterFilter);
+   greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+   blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+   var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+   context2Riga2.putImageData(imgFinal, 0,0);
+
+  //Filtro gaussiano passa basso
+  /*redLevelAfterFilter = filterHighPassGaussian(redLevel,dims, 20);
+  blueLevelAfterFilter = filterHighPassGaussian(blueLevel,dims, 20);
+  greenLevelAfterFilter = filterHighPassGaussian(greenLevel,dims, 20);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context2Riga2.putImageData(imgFinal, 0,0);*/
+
+ //filtro passa alto Butterworth.
+  /*redLevelAfterFilter = filterButterworthHighPass(redLevel,dims, 20, 2);
+  blueLevelAfterFilter = filterButterworthHighPass(blueLevel,dims, 20, 2);
+  greenLevelAfterFilter = filterButterworthHighPass(greenLevel,dims, 20, 2);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context2Riga2.putImageData(imgFinal, 0,0);*/
+
+
+  //filtro passa basso Butterworth.
+  /*redLevelAfterFilter = filterButterworthLowPass(redLevel,dims, 50, 2);
+  blueLevelAfterFilter = filterButterworthLowPass(blueLevel,dims, 50, 2);
+  greenLevelAfterFilter = filterButterworthLowPass(greenLevel,dims, 50, 2);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context2Riga2.putImageData(imgFinal, 0,0);*/
+
+  //Aggiungi rumore sale e pepe
+  /*redLevelAfterFilter = aggiungiRumorePeriodico(redLevel,dims, 10);
+  blueLevelAfterFilter = aggiungiRumorePeriodico(blueLevel,dims, 10);
+  greenLevelAfterFilter = aggiungiRumorePeriodico(greenLevel,dims, 10);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  contextRiga1.putImageData(imgFinal, 0,0);*/
+
+  //Togli rumore sale e pepe
+  /*redLevelAfterFilter = eliminaRumorePeriodico(redLevel,dims, 80);
+  blueLevelAfterFilter = eliminaRumorePeriodico(blueLevel,dims, 80);
+  greenLevelAfterFilter = eliminaRumorePeriodico(greenLevel,dims, 80);
+  redLevelAfterFilter = callICfft(redLevelAfterFilter);
+  greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+  blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+  var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+  context2Riga2.putImageData(imgFinal, 0,0);*/
 
   function getMax(array){
     var max = -9911111111111;
@@ -130,11 +231,9 @@ blueLevel = getLevel(imgMatrix3, 2);
   }
 
   //callICfft(redLevel);callICfft(greenLevel);callICfft(blueLevel);
-  console.log(greenLevel);
   //var imgFinal = makeImage(redLevel, greenLevel, blueLevel); 
   
  // console.log(redLevelAfterFilter);
-  context2Riga2.putImageData(imgFinal, 0,0);
 
 
 
@@ -151,7 +250,6 @@ console.log("Durata timer globale: " + duration);
 
 function getAntiTrasformate(matrixFourierColorLevel, colorLevel){
   var start = new Date();
-  console.log("Avviato timer get ANTI trasformate");
 
     var h_primes = [];
     var $h = function(k, l) {
@@ -368,7 +466,6 @@ function getLevel(imgMatrix, colorLevel){
 function makeImage(redLevel, greenLevel, blueLevel){
   //console.log("Red level vale: " ); console.log(redLevel.length)
     var start = new Date();
-    console.log("Avviato makeImageFunction.");
     imgMatrix = new ImageData(dims[0],dims[1]);
     var cont = 0;
     for (i = 0; i < redLevel.length * 4; i += 4) {
