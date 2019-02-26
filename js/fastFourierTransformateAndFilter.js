@@ -80,23 +80,24 @@ function icfft(amplitudes)
 function cfft(amplitudes)
 {
    
-	var N = amplitudes.length;
+  var N = amplitudes.length;
 	if( N <= 1 )
 		return amplitudes;
  
 	var hN = N / 2;
 	var even = [];
-	var odd = [];
-	even.length = hN;
-	odd.length = hN;
+  var odd = [];
+  even.length = hN;
+  odd.length = hN;
 	for(var i = 0; i < hN; ++i)
 	{
 		even[i] = amplitudes[i*2];
 		odd[i] = amplitudes[i*2+1];
-	}
+  }
+
 	even = cfft(even);
 	odd = cfft(odd);
- 
+
 	var a = -2*Math.PI;
 	for(var k = 0; k < hN; ++k)
 	{
@@ -190,9 +191,9 @@ function flipRightHalf(transform, dims) {
  * @param {matrix of spatial domain image} amplitudes 
  */
 
-function callCfft(amplitudes){
+function callCfft(amplitudes, dims){
     cfft(amplitudes);
-		amplitudes = shiftFFT(amplitudes, [512,512]);
+		amplitudes = shiftFFT(amplitudes, dims);
     return amplitudes;
 }
 
@@ -200,8 +201,8 @@ function callCfft(amplitudes){
  * Apply position shift and after call fast fourier antitransformed. Finally return a matrix of int.
  * @param {matrix of spatial domain image} amplitudes 
  */
-function callICfft(amplitudes){
-    amplitudes = unshiftFFT(amplitudes, [512,512]);
+function callICfft(amplitudes, dims){
+    amplitudes = unshiftFFT(amplitudes, dims);
     icfft(amplitudes);
     for(var i = 0; i < amplitudes.length; i++){
         amplitudes[i]= Math.trunc(amplitudes[i].re);

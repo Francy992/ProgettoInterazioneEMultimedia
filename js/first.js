@@ -1,3 +1,14 @@
+//TODO: slider max variabile in base alla dimensione dell'immagine selezionata.
+//TODO: ridimensionare l'immagine se ne viene scelta una troppo grande.
+//TODO: permettere la scelta dell'immagine
+//TODO: inserire doppio slider per filtro speciale.
+//TODO: inserire min value e max value nel box di elimina banda
+
+
+//slider: 
+var sliderLowPass = $("#slider_low_pass").slider();
+var sliderHighPass = $("#slider_high_pass").slider();
+
 //Vari livelli dell'immagine. Soltanto i valori, è un array e non un'immagine.
 var redLevel = [];
 var greenLevel = [];
@@ -6,6 +17,10 @@ var blueLevel = [];
 var matrixFourierRedLevel = [];
 var matrixFourierGreenLevel = [];
 var matrixFourierBlueLevel = [];
+
+//Global frequency
+var lowPassFrequency = 1;
+var highPassFrequency = 1;
 
 //Immagine originale e variabile dimensioni globale.
 var imgRiga1 = document.getElementById("imgRiga1");
@@ -43,6 +58,18 @@ var context2Riga2 = canvas2Riga2.getContext("2d");
 
 
 $( document ).ready(function() {
+
+    /**
+     * Slider section
+     */
+
+  sliderLowPass.on("change", function(val){
+    console.log(this.id,val.value.newValue);
+  });
+
+  sliderHighPass.on("change", function(val){
+    console.log(this.id,val.value.newValue);
+  });
   //Draw temporany matrix
   context1Riga1.drawImage(imgRiga1,0,0);
   var imgMatrixOriginal = context1Riga1.getImageData(0, 0, imgRiga1.width, imgRiga1.height);
@@ -51,31 +78,31 @@ $( document ).ready(function() {
   greenLevel = getLevel(imgMatrixOriginal, 1);
   blueLevel = getLevel(imgMatrixOriginal, 2);
   //Get single level of frequency domain
-  matrixFourierRedLevel = callCfft(redLevel);
-  matrixFourierGreenLevel = callCfft(greenLevel);
-  matrixFourierBlueLevel = callCfft(blueLevel);
+  matrixFourierRedLevel = callCfft(redLevel, dims);
+  matrixFourierGreenLevel = callCfft(greenLevel, dims);
+  matrixFourierBlueLevel = callCfft(blueLevel, dims);
 
   //call method:
-  setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
+  //setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
   //LowPass
-  idealLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 25, context1Riga1, "Filtro low pass ideale");
+  //idealLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 25, context1Riga1, "Filtro low pass ideale");
   //gaussianLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, context1Riga2, "Filtro low pass gaussiano");
   //butterworthLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro low pass butterworth");
   
   //HighPass
-  idealHighPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 2, context1Riga2, "Filtro high pass ideale");
+  //idealHighPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 21, context1Riga2, "Filtro high pass ideale");
   //gaussianHighPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro high pass gaussiano");
   //butterworthHighPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro high pass butterworth");
 
   //BandReject
-  idealBandReject(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 1, context2Riga2, "Filtro band reject ideale");
+  //idealBandReject(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 1, context2Riga2, "Filtro band reject ideale");
   //gaussianBandReject(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro band reject gaussiano");
   //butterworthBandReject(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro band reject butterworth");
 
   //PassBand
-  //idealBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro passa banda ideale");
+  idealBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro passa banda ideale");
   //gaussianBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro passa banda gaussiano");
-  //butterworthBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro passa banda butterworth");
+  butterworthBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro passa banda butterworth");
 
   //SpecialFilter
   //doublePassBand(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, 15, context2Riga2, "Filtro mix passa alto e passa basso");
@@ -85,3 +112,5 @@ $( document ).ready(function() {
   //setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo canale verde."); 
 
 });
+
+

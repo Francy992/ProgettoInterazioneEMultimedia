@@ -19,24 +19,71 @@
                 <h1 style="text-align: center">Prova</h1>
             </div>
         </div>
+        <div class="row" style="display:block;border: 1px solid black; padding:15px;">
+            <div class="row">
+                <div class="col-sm-12 col-md-10 col-md-offset-1">
+                    <label for="tipo">Seleziona il tipo di filtro da utilizzare:</label><tr/>
+                    <label class="radio-inline"><input type="radio" name="tipo" id="tipo" value="0" checked>Ideale</label>
+                    <label class="radio-inline"><input type="radio" name="tipo" id="tipo" value="1">Gaussiano</label>
+                    <label class="radio-inline"><input type="radio" name="tipo" id="tipo" value="2">Butterworth</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-10 col-md-offset-1">
+                    <label for="cosa">Seleziona cosa deve fare:</label>
+                    <label class="radio-inline"><input type="radio" name="cosa" id="cosa" value="0" checked>Passa basso</label>
+                    <label class="radio-inline"><input type="radio" name="cosa" id="cosa" value="1">Passa alto</label>
+                    <label class="radio-inline"><input type="radio" name="cosa" id="cosa" value="2">Passa banda</label>
+                    <label class="radio-inline"><input type="radio" name="cosa" id="cosa" value="3">Elimina banda</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-4" id = "slider_low_pass_row">
+                    <label for="slider_low_pass">Seleziona la frequenza di taglio per il filtro passa basso:</label>
+                    <input id="slider_low_pass" type="text" data-slider-min="0" data-slider-max="512" data-slider-step="1" data-slider-value="0" />
+                </div>
+                <div class="col-sm-12 col-md-4" id = "slider_high_pass_row">
+                    <label for="slider_high_pass">Seleziona la frequenza di taglio per il filtro passa alto:</label>
+                    <input id="slider_high_pass" type="text" data-slider-min="0" data-slider-max="512" data-slider-step="1" data-slider-value="0" />
+                </div>
+                <div class="col-sm-12 col-md-4" id = "band_reject_frequency_row">
+                    <label for="band_reject_frequency">Inserisci la banda da eliminare:</label><br/><br/>
+                    <input id="band_reject_frequency" type="text" data-slider-min="0" data-slider-max="512" data-slider-step="1" data-slider-value="0" />
+                </div>
+                <div class="col-sm-12 col-md-4" id = "band_pass_frequency_row" style="display:none;">
+                    <label for="band_pass_frequency_row">Inserisci la banda da far passare:</label><br/>
+                    <input id="band_pass_frequency_row" type="text" data-slider-min="0" data-slider-max="512" data-slider-step="1" data-slider-value="0" />
+                </div>
+            </div>
+        </div>
+        
         <div class="row">
             <div class="col-sm-12 col-md-6 col-md-offset-1">
-                <label>Lena's image.</label>
-                <img id="imgRiga1" src="source/lena.jpg" alt="lena">
+            <figure class="figure">
+                <figcaption class="figure-caption" >Lena's image</figcaption>
+                <img id="imgRiga1" src="source/lena.jpg" alt="lena" class="img-fluid" alt="Responsive image">
+            </figure>
+
             </div>
             <div class="col-sm-12 col-md-6 col-md-offset-1">
-                <label></label>
-                <canvas id="canvas1Riga1" >
+                <figure class="figure">
+                    <figcaption class="figure-caption">AAA</figcaption>
+                    <canvas id="canvas1Riga1" class="img-fluid" alt="Responsive image">
+                </figure>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12 col-md-6 col-md-offset-1">
-                <label></label>
-                <canvas id="canvas1Riga2">
+                <figure class="figure">
+                    <figcaption class="figure-caption"></figcaption>
+                    <canvas id="canvas1Riga2" class="img-fluid" alt="Responsive image"></canvas>
+                </figure>                
             </div>
             <div class="col-sm-12 col-md-6 col-md-offset-1">
-                <label></label>
-                <canvas id="canvas2Riga2">
+                    <figure class="figure">
+                        <figcaption class="figure-caption"></figcaption>
+                        <canvas id="canvas2Riga2" class="img-fluid" alt="Responsive image">
+                    </figure>                
             </div>
         </div>
         <!--<div class="row">
