@@ -84,7 +84,7 @@ function cfft(amplitudes)
 	if( N <= 1 )
 		return amplitudes;
  
-	var hN = N / 2;
+	var hN = parseInt(N / 2);
 	var even = [];
   var odd = [];
   even.length = hN;

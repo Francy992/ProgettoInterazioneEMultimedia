@@ -6,8 +6,16 @@
 
 
 //slider: 
-var sliderLowPass = $("#slider_low_pass").slider();
-var sliderHighPass = $("#slider_high_pass").slider();
+var sliderLowPass = $("#slider_low_pass").slider({
+	formatter: function(value) {
+		return 'Current value: ' + value;
+	}
+});
+var sliderHighPass = $("#slider_high_pass").slider({
+	formatter: function(value) {
+		return 'Current value: ' + value;
+	}
+});
 
 //Vari livelli dell'immagine. Soltanto i valori, è un array e non un'immagine.
 var redLevel = [];
@@ -100,9 +108,9 @@ $( document ).ready(function() {
   //butterworthBandReject(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro band reject butterworth");
 
   //PassBand
-  idealBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro passa banda ideale");
+  idealBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 1, context2Riga2, "Filtro passa banda ideale");
   //gaussianBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro passa banda gaussiano");
-  butterworthBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro passa banda butterworth");
+  butterworthBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 2, 2, context1Riga2, "Filtro passa banda butterworth");
 
   //SpecialFilter
   //doublePassBand(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, 15, context2Riga2, "Filtro mix passa alto e passa basso");
