@@ -103,14 +103,14 @@ blueLevel = getLevel(imgMatrix3, 2);
   context1Riga2.putImageData(imgFinal, 0,0);*/
 
   //Filtro gaussiano passa basso
-  /*redLevelAfterFilter = filterLowPassGaussian(redLevel,dims, 40);
-  blueLevelAfterFilter = filterLowPassGaussian(blueLevel,dims, 40);
-  greenLevelAfterFilter = filterLowPassGaussian(greenLevel,dims, 40);
+  redLevelAfterFilter = filterLowPassGaussian(redLevel,dims, 2);
+  blueLevelAfterFilter = filterLowPassGaussian(blueLevel,dims, 2);
+  greenLevelAfterFilter = filterLowPassGaussian(greenLevel,dims, 2);
   redLevelAfterFilter = callICfft(redLevelAfterFilter);
   greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
   blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
   var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
-  context2Riga2.putImageData(imgFinal, 0,0);*/
+  context1Riga2.putImageData(imgFinal, 0,0);
 
   //Filtro passa alto ideale
   /*redLevelAfterFilter = filterHighPass(redLevel,dims, 20);
@@ -132,34 +132,69 @@ blueLevel = getLevel(imgMatrix3, 2);
   context1Riga2.putImageData(imgFinal, 0,0);*/
 
   //Filtro band reject ideale
-  redLevelAfterFilter = filterIdealBandReject(redLevel,dims, 20);
+  /*redLevelAfterFilter = filterIdealBandReject(redLevel,dims, 20);
   blueLevelAfterFilter = filterIdealBandReject(blueLevel,dims, 20);
   greenLevelAfterFilter = filterIdealBandReject(greenLevel,dims, 20);
   redLevelAfterFilter = callICfft(redLevelAfterFilter);
   greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
   blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
   var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
-  contextRiga1.putImageData(imgFinal, 0,0);
+  contextRiga1.putImageData(imgFinal, 0,0);*/
 
     //Filtro band reject Butterworth
-  redLevelAfterFilter = filterButterworthBandReject(redLevel,dims, 20, 2);
-  blueLevelAfterFilter = filterButterworthBandReject(blueLevel,dims, 20, 2);
-  greenLevelAfterFilter = filterButterworthBandReject(greenLevel,dims, 20, 2);
+  /*redLevelAfterFilter = filterButterworthBandReject(redLevel,dims, 1, 21);
+  blueLevelAfterFilter = filterButterworthBandReject(blueLevel,dims, 1, 21);
+  greenLevelAfterFilter = filterButterworthBandReject(greenLevel,dims, 1, 21);
   redLevelAfterFilter = callICfft(redLevelAfterFilter);
   greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
   blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
   var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
-  context1Riga2.putImageData(imgFinal, 0,0);
+  context2Riga2.putImageData(imgFinal, 0,0);*/
 
    //Filtro band reject GAUSSIANO
-   redLevelAfterFilter = filterGaussianBandPass(redLevel,dims, 20);
-   blueLevelAfterFilter = filterGaussianBandPass(blueLevel,dims, 20);
-   greenLevelAfterFilter = filterGaussianBandPass(greenLevel,dims, 20);
+   /*redLevelAfterFilter = filterGaussianBandReject(redLevel,dims, 20);
+   blueLevelAfterFilter = filterGaussianBandReject(blueLevel,dims, 20);
+   greenLevelAfterFilter = filterGaussianBandReject(greenLevel,dims, 20);
    redLevelAfterFilter = callICfft(redLevelAfterFilter);
    greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
    blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
    var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
-   context2Riga2.putImageData(imgFinal, 0,0);
+   context2Riga2.putImageData(imgFinal, 0,0);*/
+
+    //Filtro ideal band pass
+    /*redLevelAfterFilter = filterIdealBandPass(redLevel,dims, 1);
+    blueLevelAfterFilter = filterIdealBandPass(blueLevel,dims, 1);
+    greenLevelAfterFilter = filterIdealBandPass(greenLevel,dims, 1);
+    redLevelAfterFilter = callICfft(redLevelAfterFilter);
+    greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+    blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+    var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+    console.log(imgFinal);
+    context2Riga2.putImageData(imgFinal, 0,0);*/
+
+    //Filtro Gaussian band pass
+    redLevelAfterFilter = filterGaussianBandPass(redLevel,dims, 2);
+    blueLevelAfterFilter = filterGaussianBandPass(blueLevel,dims, 2);
+    greenLevelAfterFilter = filterGaussianBandPass(greenLevel,dims, 2);
+    redLevelAfterFilter = callICfft(redLevelAfterFilter);
+    greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+    blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+    var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+    console.log(imgFinal);
+    context2Riga2.putImageData(imgFinal, 0,0);
+
+    
+    //Filtro butterworth band pass
+    redLevelAfterFilter = filterButterworthBandPass(redLevel,dims, 1, 2);
+    blueLevelAfterFilter = filterButterworthBandPass(blueLevel,dims, 1, 2);
+    greenLevelAfterFilter = filterButterworthBandPass(greenLevel,dims, 1, 2);
+    redLevelAfterFilter = callICfft(redLevelAfterFilter);
+    greenLevelAfterFilter = callICfft(greenLevelAfterFilter);
+    blueLevelAfterFilter = callICfft(blueLevelAfterFilter);
+    var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter); 
+    console.log(imgFinal);
+    context2Riga2.putImageData(imgFinal, 0,0);
+
 
   //Filtro gaussiano passa basso
   /*redLevelAfterFilter = filterHighPassGaussian(redLevel,dims, 20);

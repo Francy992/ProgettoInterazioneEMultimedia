@@ -348,6 +348,30 @@ function filterLowPass(amplitudes, dims, lowPass) {
     return newArray;
   }
 
+  function filterIdealBandPass(amplitudes, dims, cutFrequency) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    var cont = 0; cont1 = 0;
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        if ( (duv < (d0 - cutFrequency/2)) || (duv > (d0 + cutFrequency/2))) {
+          newArray[idx] = new Complex(0, 0);
+          cont++;
+        }
+        else {
+          newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
+          cont1++;
+        }
+      }
+    }
+    console.log(cont,cont1);
+    return newArray;
+  }
+
   function filterGaussianBandPass(amplitudes, dims, cutFrequency) {
     var d0 = Math.pow(cutFrequency, 2);
     var N = dims[1];
@@ -361,6 +385,24 @@ function filterLowPass(amplitudes, dims, lowPass) {
         var den = duv*cutFrequency;
         var tot = Math.pow((num/den),2);
         var huv = 1 - (1 - Math.pow(Math.E, -tot));
+        newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      }
+    }
+    return newArray;
+  }
+
+  function filterButterworthBandPass(amplitudes, dims, cutFrequency, order) {
+    var d0 = Math.pow(cutFrequency, 2);
+    var N = dims[1];
+    var M = dims[0];
+    var newArray = [];
+    for (var k = 0; k < N; k++) {
+      for (var l = 0; l < M; l++) {
+        var idx = k*M + l;
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var num = duv*cutFrequency;
+        var den = (duv*duv) - (d0*d0);
+        var huv = 1 - (1/(1+Math.pow( num/den, (2*order))));
         newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
       }
     }
@@ -391,7 +433,7 @@ function filterLowPass(amplitudes, dims, lowPass) {
 
 
 
-function filter(amplitudes, dims, lowPass, highPass) {
+function filterPassInside(amplitudes, dims, lowPass, highPass) {
     var lowPassSq = Math.pow(lowPass, 2);
     var highPassSq = Math.pow(highPass, 2);
     var N = dims[1];
