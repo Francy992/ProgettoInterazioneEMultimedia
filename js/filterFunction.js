@@ -32,7 +32,9 @@ function idealLowPass(redLevel, blueLevel, greenLevel, dims, frequency, context,
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims);
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("IdealLowPass: " + duration + "ms");
   }
@@ -48,7 +50,9 @@ function idealLowPass(redLevel, blueLevel, greenLevel, dims, frequency, context,
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("GaussianLowPass: " + duration + "ms");
   }
@@ -63,7 +67,9 @@ function idealLowPass(redLevel, blueLevel, greenLevel, dims, frequency, context,
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("ButterworthLowPass: " + duration + "ms");
   }
@@ -92,7 +98,9 @@ function idealHighPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);    
+    $("#down"+context.canvas.id+" span").text("Download " + message);    
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("IdealHighPass: " + duration + "ms");
   }
@@ -108,7 +116,9 @@ function idealHighPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("GaussianHighPass: " + duration + "ms");
   }
@@ -123,7 +133,9 @@ function idealHighPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("ButterworthHighPass: " + duration + "ms");
   }
@@ -153,7 +165,9 @@ function idealBandReject(redLevel, blueLevel, greenLevel, dims, frequency, conte
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("IdealBandReject: " + duration + "ms");
   }
@@ -169,7 +183,9 @@ function idealBandReject(redLevel, blueLevel, greenLevel, dims, frequency, conte
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("GaussianBandReject: " + duration + "ms");
   }
@@ -184,7 +200,9 @@ function idealBandReject(redLevel, blueLevel, greenLevel, dims, frequency, conte
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("ButterworthBandReject: " + duration + "ms");
   }
@@ -214,7 +232,9 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);    
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("IdealBandPass: " + duration + "ms");
   }
@@ -230,7 +250,9 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("GaussianBandPass: " + duration + "ms");
   }
@@ -246,7 +268,9 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     console.log(imgFinal);
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("ButterworthBandPass: " + duration + "ms");
   }
@@ -262,7 +286,9 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("DoublePassBand: " + duration + "ms");
   }
@@ -290,7 +316,9 @@ function setMagnitudeToContext(redLevel, blueLevel, greenLevel, dims, context, m
     greenLevelAfterFilter = getMagnitudeImage(greenLevel,dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("SetMagnitudeToContext: " + duration + "ms");
 }
@@ -300,7 +328,9 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
     colorLevelAfterFilter = getMagnitudeImage(colorLevel,dims);
     var imgFinal = makeImageGreyScale(colorLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     var duration = +new Date() - start;
     console.log("SetMagnitudeSingleChannelToContext: " + duration + "ms");
   }

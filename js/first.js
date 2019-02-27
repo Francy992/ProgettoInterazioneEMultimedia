@@ -30,6 +30,16 @@ $("#slider_2_val").on("change", function(){
     recalculate2 = true;
 });
 
+//Butterworth order change
+$("#butterworth_1").on("change", function(){
+    butterworthOrder1 = $(this).val();
+    recalculate1 = true;
+});
+$("#butterworth_2").on("change", function(){
+    butterworthOrder2 = $(this).val();
+    recalculate2 = true;
+});
+
 
 
 //Vari livelli dell'immagine. Soltanto i valori, è un array e non un'immagine.
@@ -54,8 +64,8 @@ var frequency1 = 1;
 var frequency2 = 1;
 var recalculate1 = true; // recalculate only if we change a parameter.
 var recalculate2 = true;
-
-
+var butterworthOrder1 = 1;
+var butterworthOrder2 = 1;
 //Immagine originale e variabile dimensioni globale.
 var imgRiga1 = document.getElementById("imgRiga1");
 var dims = [imgRiga1.naturalWidth, imgRiga1.naturalHeight];
@@ -111,15 +121,27 @@ $( document ).ready(function() {
   /**
    * RadioButton section listener
    */
-
     $('input[type=radio][name=tipo1]').change(function() {
         tipo1 = this.value;
         recalculate1 = true;
+        if(this.value == "butterworth"){//show input n-order
+            $("#butterworth_1_col").show();
+        }
+        else{
+            $("#butterworth_1_col").hide();
+        }
+
     });
 
     $('input[type=radio][name=tipo2]').change(function() {
         tipo2 = this.value;
         recalculate2 = true;
+        if(this.value == "butterworth"){//show input n-order
+            $("#butterworth_2_col").show();
+        }
+        else{
+            $("#butterworth_2_col").hide();
+        }
     });
 
     $('input[type=radio][name=cosa1]').change(function() {
@@ -141,17 +163,66 @@ $( document ).ready(function() {
     }
 
     /**
+     * DOWNLOAD SECTION
+     */
+
+    $("#downcanvas1Riga1").on("click", function(){
+        var download = document.getElementById("downloadcanvas1Riga1");
+        var image = document.getElementById("canvas1Riga1").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    });
+    $("#downcanvas1Magnitude").on("click", function(){
+        var download = document.getElementById("downloadcanvas1Magnitude");
+        var image = document.getElementById("canvas1Magnitude").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    });
+    $("#downcanvas2Magnitude").on("click", function(){
+        var download = document.getElementById("downloadcanvas2Magnitude");
+        var image = document.getElementById("canvas2Magnitude").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    });
+    $("#downcanvas3Magnitude").on("click", function(){
+        var download = document.getElementById("downloadcanvas3Magnitude");
+        var image = document.getElementById("canvas3Magnitude").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    });
+    $("#downcanvas1Riga2").on("click", function(){
+        var download = document.getElementById("downloadcanvas1Riga2");
+        var image = document.getElementById("canvas1Riga2").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    }); 
+    $("#downcanvas2Riga2").on("click", function(){
+        var download = document.getElementById("downloadcanvas2Riga2");
+        var image = document.getElementById("canvas2Riga2").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    });
+
+    /**
      * Button go operation listener
      */
     $('#go').on("click", function(){
         mostraTutto();
         setTimeout(function(){
             if(recalculate1){
-                window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
+                if(tipo1 != "butterworth")
+                    window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
+                else 
+                    window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency1, butterworthOrder1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
                 recalculate1 = false;
             }
             if(recalculate2){
-                window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
+                if(tipo2 != "butterworth")
+                    window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
+                else {
+                    window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, butterworthOrder2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
+                }
+
                 recalculate2 = false;
             }
             $('#messageError').text("");
