@@ -1,21 +1,36 @@
-//TODO: slider max variabile in base alla dimensione dell'immagine selezionata.
-//TODO: ridimensionare l'immagine se ne viene scelta una troppo grande.
-//TODO: permettere la scelta dell'immagine
 //TODO: inserire doppio slider per filtro speciale.
-//TODO: inserire min value e max value nel box di elimina banda
+
 
 
 //slider: 
-var sliderLowPass = $("#slider_low_pass").slider({
+var slider_1 = $("#slider_1").slider({
 	formatter: function(value) {
-		return 'Current value: ' + value;
+        var sliderLowPassVal = $("#slider_1_val");
+        sliderLowPassVal.val(value);
+        frequency1 = value;
+        recalculate1 = true;
 	}
 });
-var sliderHighPass = $("#slider_high_pass").slider({
+var slider_2 = $("#slider_2").slider({
 	formatter: function(value) {
-		return 'Current value: ' + value;
+        var sliderHighPassVal = $("#slider_2_val");
+        sliderHighPassVal.val(value);
+        frequency2 = value;
+        recalculate2 = true;
 	}
 });
+$("#slider_1_val").on("change", function(){     
+    $("#slider_1").slider("setValue",$(this).val());
+    frequency1 = $(this).val();
+    recalculate1 = true;
+});
+$("#slider_2_val").on("change", function(){
+    $("#slider_2").slider("setValue",$(this).val());
+    frequency2 = $(this).val();
+    recalculate2 = true;
+});
+
+
 
 //Vari livelli dell'immagine. Soltanto i valori, è un array e non un'immagine.
 var redLevel = [];
@@ -30,9 +45,20 @@ var matrixFourierBlueLevel = [];
 var lowPassFrequency = 1;
 var highPassFrequency = 1;
 
+//For build function call name
+var tipo1 = "ideal";
+var cosa1 = "LowPass";
+var tipo2 = "ideal";
+var cosa2 = "LowPass";
+var frequency1 = 1;
+var frequency2 = 1;
+var recalculate1 = true; // recalculate only if we change a parameter.
+var recalculate2 = true;
+
+
 //Immagine originale e variabile dimensioni globale.
 var imgRiga1 = document.getElementById("imgRiga1");
-var dims = [imgRiga1.width,imgRiga1.height];
+var dims = [imgRiga1.naturalWidth, imgRiga1.naturalHeight];
 
 //Creo le variabili canvas, imagine e context
 var canvas1Riga1 = document.getElementById("canvas1Riga1");
@@ -50,51 +76,235 @@ canvas2Riga2.width = dims[0];
 canvas2Riga2.height = dims[1];
 var context2Riga2 = canvas2Riga2.getContext("2d");
 
+//CanvasMagnitude RGB.
+var canvas1Magnitude = document.getElementById("canvas1Magnitude");
+canvas1Magnitude.width = dims[0];
+canvas1Magnitude.height = dims[1];
+var context1Magnitude = canvas1Magnitude.getContext("2d");
 
-//context1Riga2.drawImage(imgRiga1,0,0);
-//context2Riga2.drawImage(imgRiga1,0,0);
+var canvas2Magnitude = document.getElementById("canvas2Magnitude");
+canvas2Magnitude.width = dims[0];
+canvas2Magnitude.height = dims[1];
+var context2Magnitude = canvas2Magnitude.getContext("2d");
 
-//Estraggo la matrice da context e ci lavoro
-//La matrice è composta da NxNx4 pixel dove NxN sono i pixel dell'immagine e 4 sono i canali, compreso alpha
+var canvas3Magnitude = document.getElementById("canvas3Magnitude");
+canvas3Magnitude.width = dims[0];
+canvas3Magnitude.height = dims[1];
+var context3Magnitude = canvas3Magnitude.getContext("2d");
 
-
-
-
-  
-  
-  //setMagnitudeSingleChannelToContext(greenLevel, dims, context2Riga2);
 
 
 $( document ).ready(function() {
+    /**
+     * Slider section listener
+     */
+    slider_1.on("change", function(val){
+        frequency1 = val.value.newValue;
+        recalculate1 = true;
+    });
+
+    slider_2.on("change", function(val){
+        frequency2 = val.value.newValue;
+        recalculate2 = true;
+    });
+
+  /**
+   * RadioButton section listener
+   */
+
+    $('input[type=radio][name=tipo1]').change(function() {
+        tipo1 = this.value;
+        recalculate1 = true;
+    });
+
+    $('input[type=radio][name=tipo2]').change(function() {
+        tipo2 = this.value;
+        recalculate2 = true;
+    });
+
+    $('input[type=radio][name=cosa1]').change(function() {
+        cosa1 = this.value;
+        recalculate1 = true;
+    });
+
+    $('input[type=radio][name=cosa2]').change(function() {
+        cosa2 = this.value;
+        recalculate2 = true;
+    });
+
+    function mostraTutto(){
+        $("#"+this.id).attr("disabled", true);
+        $("#magnitude").hide();
+        $('#messageError').text("Esecuzione operazione richiesta in corso...");
+        $('#messageError').show();
+        $('#spinner').show();
+    }
 
     /**
-     * Slider section
+     * Button go operation listener
      */
+    $('#go').on("click", function(){
+        mostraTutto();
+        setTimeout(function(){
+            if(recalculate1){
+                window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
+                recalculate1 = false;
+            }
+            if(recalculate2){
+                window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
+                recalculate2 = false;
+            }
+            $('#messageError').text("");
+            $('#messageError').hide();
+            $('#spinner').hide();
+            $("#compare").show();
+            $("#showMagnitudo").show();
+        }, 400);
 
-  sliderLowPass.on("change", function(val){
-    console.log(this.id,val.value.newValue);
-  });
+        $("#"+this.id).attr("disabled", false);
+    });
 
-  sliderHighPass.on("change", function(val){
-    console.log(this.id,val.value.newValue);
-  });
-  //Draw temporany matrix
-  context1Riga1.drawImage(imgRiga1,0,0);
-  var imgMatrixOriginal = context1Riga1.getImageData(0, 0, imgRiga1.width, imgRiga1.height);
-  //Get single level of spatial domain
-  redLevel = getLevel(imgMatrixOriginal, 0);
-  greenLevel = getLevel(imgMatrixOriginal, 1);
-  blueLevel = getLevel(imgMatrixOriginal, 2);
-  //Get single level of frequency domain
-  matrixFourierRedLevel = callCfft(redLevel, dims);
-  matrixFourierGreenLevel = callCfft(greenLevel, dims);
-  matrixFourierBlueLevel = callCfft(blueLevel, dims);
+    $("#showMagnitudo").on("click", function(){
+        $("#magnitude").show();
+        $("#compare").hide();
+        $("#showMagnitudo").hide();
+    });
 
-  //call method:
-  //setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
+    /**
+    * Inizialize section and fast fourier transformate.
+    */
+    //Draw temporany matrix
+    context1Riga1.drawImage(imgRiga1,0,0);
+    var imgMatrixOriginal = context1Riga1.getImageData(0, 0, dims[0], dims[1]);
+    //Get single level of spatial domain
+    redLevel = getLevel(imgMatrixOriginal, 0);
+    greenLevel = getLevel(imgMatrixOriginal, 1);
+    blueLevel = getLevel(imgMatrixOriginal, 2);
+    //Get single level of frequency domain
+    matrixFourierRedLevel = callCfft(redLevel, dims);
+    matrixFourierGreenLevel = callCfft(greenLevel, dims);
+    matrixFourierBlueLevel = callCfft(blueLevel, dims);
+    $('#spinner').show(); 
+    //call method:
+    setTimeout(function(){
+        setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
+        setMagnitudeSingleChannelToContext(matrixFourierRedLevel, dims, context1Magnitude, "Magnitudo canale rosso."); 
+        setMagnitudeSingleChannelToContext(matrixFourierBlueLevel, dims, context2Magnitude, "Magnitudo canale blue."); 
+        setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
+        $("#go").removeAttr("disabled");
+        $('#spinner').hide(); 
+    }, 400);
+       
+
+
+
+    
+    /**
+     * Load new image
+     */
+    $("#fileUploader").change(function(){
+        if (this.files && this.files[0]) {
+            $("#magnitude").show();
+            $("#compare").hide();
+            $("#showMagnitudo").hide();
+            var reader = new FileReader();
+            var oldSrc = $('#imgRiga1').attr('src');
+
+            reader.onload = function (e) {
+                $('#imgRiga1').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(this.files[0]);
+
+            reader.onloadend = function(){
+                if(imgRiga1.naturalWidth > 1024 || imgRiga1.naturalHeight > 1024){
+                    $('#messageError').text("Le dimensioni dell'immagine sono troppo grandi.");
+                    $('#messageError').show();
+                    $('#imgRiga1').attr('src', oldSrc);
+                }
+                else{
+                    $('#spinner').show(); 
+                    setTimeout(function(){
+                        $('#messageError').text("");
+                        $('#messageError').hide();
+                        dims = [imgRiga1.naturalWidth, imgRiga1.naturalHeight];
+                        setMaxValue(dims[0]);
+                        imgRiga1 = document.getElementById("imgRiga1");
+                        canvas1Riga1 = document.getElementById("canvas1Riga1");
+                        canvas1Riga1.width = dims[0];
+                        canvas1Riga1.height = dims[1];
+                        context1Riga1 = canvas1Riga1.getContext("2d");
+                        context1Riga1.drawImage(imgRiga1,0,0);
+                        var imgMatrixOriginal = context1Riga1.getImageData(0, 0, dims[0], dims[1]);
+
+                        //ReInizialize context and canvas.
+                        
+
+                        canvas1Riga2 = document.getElementById("canvas1Riga2");
+                        canvas1Riga2.width = dims[0];
+                        canvas1Riga2.height = dims[1];
+                        context1Riga2 = canvas1Riga2.getContext("2d");
+
+                        canvas2Riga2 = document.getElementById("canvas2Riga2");
+                        canvas2Riga2.width = dims[0];
+                        canvas2Riga2.height = dims[1];
+                        context2Riga2 = canvas2Riga2.getContext("2d");
+
+                        //CanvasMagnitude RGB.
+                        canvas1Magnitude.width = dims[0];
+                        canvas1Magnitude.height = dims[1];
+                        context1Magnitude = canvas1Magnitude.getContext("2d");
+
+                        canvas2Magnitude.width = dims[0];
+                        canvas2Magnitude.height = dims[1];
+                        context2Magnitude = canvas2Magnitude.getContext("2d");
+
+                        canvas3Magnitude.width = dims[0];
+                        canvas3Magnitude.height = dims[1];
+                        context3Magnitude = canvas3Magnitude.getContext("2d");
+
+                        //Get single level of spatial domain
+                        redLevel = getLevel(imgMatrixOriginal, 0);
+                        greenLevel = getLevel(imgMatrixOriginal, 1);
+                        blueLevel = getLevel(imgMatrixOriginal, 2);
+                        //Get single level of frequency domain
+                        matrixFourierRedLevel = callCfft(redLevel, dims);
+                        matrixFourierGreenLevel = callCfft(greenLevel, dims);
+                        matrixFourierBlueLevel = callCfft(blueLevel, dims);
+
+                        //call method:
+                        setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
+                        setMagnitudeSingleChannelToContext(matrixFourierRedLevel, dims, context1Magnitude, "Magnitudo canale rosso."); 
+                        setMagnitudeSingleChannelToContext(matrixFourierBlueLevel, dims, context2Magnitude, "Magnitudo canale blue."); 
+                        setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
+
+                        //reupload = true;
+                        recalculate1 = true;
+                        recalculate2 = true;
+                        $('#spinner').hide(); 
+                    }, 400);
+                }
+            }
+        }
+    });
+
+    /**
+     * Support function - set max value on slider and input type number
+     * @param {*} val 
+     */
+    function setMaxValue(val){
+        $("#slider_1_val").attr("max", val);
+        $("#slider_2_val").attr("max", val);
+        $("#slider_1").slider('setAttribute', 'max', val);
+        $("#slider_1").slider('refresh');
+        $("#slider_2").slider('setAttribute', 'max', val);
+        $("#slider_2").slider('refresh');
+        frequency1 = 1;
+        frequency2 = 1;
+    }
+
   //LowPass
-  //idealLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 25, context1Riga1, "Filtro low pass ideale");
-  //gaussianLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, context1Riga2, "Filtro low pass gaussiano");
+  //idealLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 35, context1Riga2, "Filtro low pass ideale");
+  //gaussianLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 35, context2Riga2, "Filtro low pass gaussiano");
   //butterworthLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro low pass butterworth");
   
   //HighPass
@@ -108,9 +318,9 @@ $( document ).ready(function() {
   //butterworthBandReject(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 5, 2, context1Riga2, "Filtro band reject butterworth");
 
   //PassBand
-  idealBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 1, context2Riga2, "Filtro passa banda ideale");
+  //idealBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 1, context2Riga2, "Filtro passa banda ideale");
   //gaussianBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, context2Riga2, "Filtro passa banda gaussiano");
-  butterworthBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 2, 2, context1Riga2, "Filtro passa banda butterworth");
+  //butterworthBandPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 1, 2, context1Riga2, "Filtro passa banda butterworth");
 
   //SpecialFilter
   //doublePassBand(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 3, 15, context2Riga2, "Filtro mix passa alto e passa basso");
