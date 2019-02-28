@@ -1,6 +1,7 @@
 //TODO: inserire doppio slider per filtro speciale.
-
-
+//TODO: attivare filtro speciale e risultato nell'immagine accanto.
+//TODO: inserire rumore casuale in un immagine e scaricare il tutto.
+//TODO: controllare come far attivare questo taglio nel caso di gaussiano/butterborth.
 
 //slider: 
 var slider_1 = $("#slider_1").slider({
@@ -19,6 +20,7 @@ var slider_2 = $("#slider_2").slider({
         recalculate2 = true;
 	}
 });
+
 $("#slider_1_val").on("change", function(){     
     $("#slider_1").slider("setValue",$(this).val());
     frequency1 = $(this).val();
@@ -28,6 +30,31 @@ $("#slider_2_val").on("change", function(){
     $("#slider_2").slider("setValue",$(this).val());
     frequency2 = $(this).val();
     recalculate2 = true;
+});
+
+
+/**
+ * PASSBAND SLIDER
+ */
+var sliderBandPass_1 = $("#bandPass_1").slider({
+	formatter: function(value) {
+        var sliderLowPassVal = $("#bandPass_1");
+        sliderLowPassVal.val(value);
+        bandPassMin1 = value[0];//set bandPass min and max for passBandFilter.
+        bandPassMax1 = value[1];
+        $("#bandPass_1_min").text(bandPassMin1);
+        $("#bandPass_1_max").text(bandPassMax1);
+	}
+});
+var sliderBandPass_2 = $("#bandPass_2").slider({
+	formatter: function(value) {
+        var sliderLowPassVal = $("#bandPass_2");
+        sliderLowPassVal.val(value);
+        bandPassMin2 = value[0];//set bandPass min and max for passBandFilter.
+        bandPassMax2 = value[1];
+        $("#bandPass_2_min").text(bandPassMin2);
+        $("#bandPass_2_max").text(bandPassMax2);
+	}
 });
 
 //Butterworth order change
@@ -46,6 +73,14 @@ $("#butterworth_2").on("change", function(){
 var redLevel = [];
 var greenLevel = [];
 var blueLevel = [];
+
+//Matrice contenente i valori della magnitudo, necessaria per passarla ai vari filtri e far diventare nero di volta in volta il tutto, senza aggiornarla mai.
+var matrixMagnitudoRgb1 = [];
+var matrixMagnitudoRgb2 = [];
+var redLevelMagnitudoRgb1 = [];
+var greenLevelMagnidutoRgb1 = [];
+var blueLevelMagnitudoRgb1 = [];
+
 //Matrice contenente tutti i valori dei vari livelli della trasformata (non è un'immagine e contiene i complessi)
 var matrixFourierRedLevel = [];
 var matrixFourierGreenLevel = [];
@@ -66,6 +101,10 @@ var recalculate1 = true; // recalculate only if we change a parameter.
 var recalculate2 = true;
 var butterworthOrder1 = 1;
 var butterworthOrder2 = 1;
+var bandPassMin1 = 1;
+var bandPassMax1 = 1;
+var bandPassMin2 = 1;
+var bandPassMax2 = 1;
 //Immagine originale e variabile dimensioni globale.
 var imgRiga1 = document.getElementById("imgRiga1");
 var dims = [imgRiga1.naturalWidth, imgRiga1.naturalHeight];
@@ -85,6 +124,16 @@ var canvas2Riga2 = document.getElementById("canvas2Riga2");
 canvas2Riga2.width = dims[0];
 canvas2Riga2.height = dims[1];
 var context2Riga2 = canvas2Riga2.getContext("2d");
+
+var canvas1MagnitudeRiga1 = document.getElementById("canvas1MagnitudeRiga1");
+canvas1MagnitudeRiga1.width = dims[0];
+canvas1MagnitudeRiga1.height = dims[1];
+var context1MagnitudeRiga1 = canvas1MagnitudeRiga1.getContext("2d");
+
+var canvas1MagnitudeRiga2 = document.getElementById("canvas1MagnitudeRiga2");
+canvas1MagnitudeRiga2.width = dims[0];
+canvas1MagnitudeRiga2.height = dims[1];
+var context1MagnitudeRiga2 = canvas1MagnitudeRiga2.getContext("2d");
 
 //CanvasMagnitude RGB.
 var canvas1Magnitude = document.getElementById("canvas1Magnitude");
@@ -112,10 +161,15 @@ $( document ).ready(function() {
         frequency1 = val.value.newValue;
         recalculate1 = true;
     });
+    slider_1.on("change", function(val){
+        frequency1 = val.value.newValue;
+        recalculate1 = true;
+    });
 
-    slider_2.on("change", function(val){
-        frequency2 = val.value.newValue;
-        recalculate2 = true;
+    sliderBandPass_1.on("change", function(val){
+        bandPassMin1 = val.value.newValue[0];
+        bandPassMax1 = val.value.newValue[1];
+        setCircle(redLevelMagnitudoRgb1, greenLevelMagnitudoRgb1, blueLevelMagnitudoRgb1, dims, bandPassMin1, bandPassMax1, context1MagnitudeRiga1, "Bau");
     });
 
   /**
@@ -142,16 +196,29 @@ $( document ).ready(function() {
         else{
             $("#butterworth_2_col").hide();
         }
+       
     });
 
     $('input[type=radio][name=cosa1]').change(function() {
         cosa1 = this.value;
         recalculate1 = true;
+        if(this.value == "BandPass"){//show input n-order
+            $("#bandPass_1_col").show();
+        }
+        else{
+            $("#bandPass_1_col").hide();
+        }
     });
 
     $('input[type=radio][name=cosa2]').change(function() {
         cosa2 = this.value;
         recalculate2 = true;
+        if(this.value == "BandPass"){//show input n-order
+            $("#bandPass_2_col").show();
+        }
+        else{
+            $("#bandPass_2_col").hide();
+        }
     });
 
     function mostraTutto(){
@@ -207,6 +274,7 @@ $( document ).ready(function() {
      * Button go operation listener
      */
     $('#go').on("click", function(){
+
         mostraTutto();
         setTimeout(function(){
             if(recalculate1){
@@ -259,9 +327,11 @@ $( document ).ready(function() {
     //call method:
     setTimeout(function(){
         setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
-        setMagnitudeSingleChannelToContext(matrixFourierRedLevel, dims, context1Magnitude, "Magnitudo canale rosso."); 
-        setMagnitudeSingleChannelToContext(matrixFourierBlueLevel, dims, context2Magnitude, "Magnitudo canale blue."); 
-        setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
+        setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1MagnitudeRiga1, "Magnitudo RGB.");
+        setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1MagnitudeRiga2, "Magnitudo RGB.");
+        redLevelMagnitudoRgb1 = setMagnitudeSingleChannelToContext(matrixFourierRedLevel, dims, context1Magnitude, "Magnitudo canale rosso."); 
+        blueLevelMagnitudoRgb1 = setMagnitudeSingleChannelToContext(matrixFourierBlueLevel, dims, context2Magnitude, "Magnitudo canale blue."); 
+        greenLevelMagnitudoRgb1 = setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
         $("#go").removeAttr("disabled");
         $('#spinner').hide(); 
     }, 400);
@@ -343,7 +413,7 @@ $( document ).ready(function() {
                         matrixFourierBlueLevel = callCfft(blueLevel, dims);
 
                         //call method:
-                        setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
+                        matrixMagnitudoRgb1 = matrixMagnitudoRgb2 = setMagnitudeToContext(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, context1Riga1, "Magnitudo RGB."); 
                         setMagnitudeSingleChannelToContext(matrixFourierRedLevel, dims, context1Magnitude, "Magnitudo canale rosso."); 
                         setMagnitudeSingleChannelToContext(matrixFourierBlueLevel, dims, context2Magnitude, "Magnitudo canale blue."); 
                         setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
