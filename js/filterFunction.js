@@ -162,11 +162,11 @@ function idealHighPass(redLevel, blueLevel, greenLevel, dims, frequency, context
  * @param {Context javascript object for put image data} context 
  * 
  */
-function idealBandReject(redLevel, blueLevel, greenLevel, dims, frequency, context, message){
+function idealBandReject(redLevel, blueLevel, greenLevel, dims,  frequencyLow, frequencyHigh, context, message){
     var start = new Date();
-    redLevelAfterFilter = filterIdealBandReject(redLevel,dims, frequency);
-    blueLevelAfterFilter = filterIdealBandReject(blueLevel,dims, frequency);
-    greenLevelAfterFilter = filterIdealBandReject(greenLevel,dims, frequency);
+    redLevelAfterFilter = filterIdealBandReject(redLevel,dims, frequencyLow, frequencyHigh);
+    blueLevelAfterFilter = filterIdealBandReject(blueLevel,dims, frequencyLow, frequencyHigh);
+    greenLevelAfterFilter = filterIdealBandReject(greenLevel,dims, frequencyLow, frequencyHigh);
     redLevelAfterFilter = callICfft(redLevelAfterFilter, dims);
     greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
@@ -181,11 +181,11 @@ function idealBandReject(redLevel, blueLevel, greenLevel, dims, frequency, conte
   }
   
 
-  function gaussianBandReject(redLevel, blueLevel, greenLevel, dims, frequency, context, message){
+  function gaussianBandReject(redLevel, blueLevel, greenLevel, dims, frequencyLow, frequencyHigh, context, message){
     var start = new Date();
-    redLevelAfterFilter = filterGaussianBandReject(redLevel,dims, frequency);
-    blueLevelAfterFilter = filterGaussianBandReject(blueLevel,dims, frequency);
-    greenLevelAfterFilter = filterGaussianBandReject(greenLevel,dims, frequency);
+    redLevelAfterFilter = filterGaussianBandReject(redLevel,dims, frequencyLow, frequencyHigh);
+    blueLevelAfterFilter = filterGaussianBandReject(blueLevel,dims, frequencyLow, frequencyHigh);
+    greenLevelAfterFilter = filterGaussianBandReject(greenLevel,dims, frequencyLow, frequencyHigh);
     redLevelAfterFilter = callICfft(redLevelAfterFilter, dims);
     greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
@@ -199,11 +199,11 @@ function idealBandReject(redLevel, blueLevel, greenLevel, dims, frequency, conte
     console.log("GaussianBandReject: " + duration + "ms");
   }
 
-  function butterworthBandReject(redLevel, blueLevel, greenLevel, dims, frequency, order, context, message){
+  function butterworthBandReject(redLevel, blueLevel, greenLevel, dims, frequencyLow, frequencyHigh, order, context, message){
     var start = new Date();
-    redLevelAfterFilter = filterButterworthBandReject(redLevel,dims, frequency, order);
-    blueLevelAfterFilter = filterButterworthBandReject(blueLevel,dims, frequency, order);
-    greenLevelAfterFilter = filterButterworthBandReject(greenLevel,dims, frequency, order);
+    redLevelAfterFilter = filterButterworthBandReject(redLevel,dims, frequencyLow, frequencyHigh, order);
+    blueLevelAfterFilter = filterButterworthBandReject(blueLevel,dims, frequencyLow, frequencyHigh, order);
+    greenLevelAfterFilter = filterButterworthBandReject(greenLevel,dims, frequencyLow, frequencyHigh, order);
     redLevelAfterFilter = callICfft(redLevelAfterFilter, dims);
     greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
@@ -232,11 +232,11 @@ function idealBandReject(redLevel, blueLevel, greenLevel, dims, frequency, conte
  * @param {Context javascript object for put image data} context 
  * 
  */
-function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context, message){
+function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequencyLow, frequencyHigh, context, message){
     var start = new Date();
-    redLevelAfterFilter = filterIdealBandPass(redLevel,dims, frequency);
-    blueLevelAfterFilter = filterIdealBandPass(blueLevel,dims, frequency);
-    greenLevelAfterFilter = filterIdealBandPass(greenLevel,dims, frequency);
+    redLevelAfterFilter = filterIdealBandPass(redLevel,dims, frequencyLow, frequencyHigh);
+    blueLevelAfterFilter = filterIdealBandPass(blueLevel,dims, frequencyLow, frequencyHigh);
+    greenLevelAfterFilter = filterIdealBandPass(greenLevel,dims, frequencyLow, frequencyHigh);
     redLevelAfterFilter = callICfft(redLevelAfterFilter, dims);
     greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
@@ -251,15 +251,16 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context
   }
   
 
-  function gaussianBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context, message){
+  function gaussianBandPass(redLevel, blueLevel, greenLevel, dims, frequencyLow, frequencyHigh, context, message){
     var start = new Date();
-    redLevelAfterFilter = filterGaussianBandPass(redLevel,dims, frequency);
-    blueLevelAfterFilter = filterGaussianBandPass(blueLevel,dims, frequency);
-    greenLevelAfterFilter = filterGaussianBandPass(greenLevel,dims, frequency);
+    redLevelAfterFilter = filterGaussianBandPass(redLevel, dims, frequencyLow, frequencyHigh);
+    blueLevelAfterFilter = filterGaussianBandPass(blueLevel, dims, frequencyLow, frequencyHigh);
+    greenLevelAfterFilter = filterGaussianBandPass(greenLevel, dims, frequencyLow, frequencyHigh);
     redLevelAfterFilter = callICfft(redLevelAfterFilter, dims);
     greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
+    console.log(imgFinal)
     context.putImageData(imgFinal, 0,0);
     $("#"+context.canvas.id).prev().text(message);     
     $("#down"+context.canvas.id+" span").text("Download " + message);     
@@ -269,11 +270,11 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequency, context
     console.log("GaussianBandPass: " + duration + "ms");
   }
 
-  function butterworthBandPass(redLevel, blueLevel, greenLevel, dims, frequency, order, context, message){
+  function butterworthBandPass(redLevel, blueLevel, greenLevel, dims, frequencyLow, frequencyHigh, order, context, message){
     var start = new Date();
-    redLevelAfterFilter = filterButterworthBandPass(redLevel,dims, frequency, order);
-    blueLevelAfterFilter = filterButterworthBandPass(blueLevel,dims, frequency, order);
-    greenLevelAfterFilter = filterButterworthBandPass(greenLevel,dims, frequency, order);
+    redLevelAfterFilter = filterButterworthBandPass(redLevel,dims, frequencyLow, frequencyHigh, order);
+    blueLevelAfterFilter = filterButterworthBandPass(blueLevel,dims, frequencyLow, frequencyHigh, order);
+    greenLevelAfterFilter = filterButterworthBandPass(greenLevel,dims, frequencyLow, frequencyHigh, order);
     redLevelAfterFilter = callICfft(redLevelAfterFilter, dims);
     greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
@@ -352,11 +353,11 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
     return colorLevelAfterFilter;
   }
   
-  function setCircle(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
+  function setCirclePassBand(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
         var start = new Date();
-        redLevelAfterFilter = printMagnitudeCircle(redLevel, dims, frequencyLowPass, frequencyHighPass);
-        greenLevelAfterFilter = printMagnitudeCircle(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-        blueLevelAfterFilter = printMagnitudeCircle(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+        redLevelAfterFilter = printMagnitudeCirclePassBand(redLevel, dims, frequencyLowPass, frequencyHighPass);
+        greenLevelAfterFilter = printMagnitudeCirclePassBand(greenLevel,dims, frequencyLowPass, frequencyHighPass);
+        blueLevelAfterFilter = printMagnitudeCirclePassBand(blueLevel,dims, frequencyLowPass, frequencyHighPass);
         var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
         context.putImageData(imgFinal, 0,0);
         $("#"+context.canvas.id).prev().text(message);     
@@ -367,6 +368,21 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
         console.log("setCircle: " + duration + "ms");
   }
 
+
+  function setCircleBandReject(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
+    var start = new Date();
+    redLevelAfterFilter = printMagnitudeCircleBandReject(redLevel, dims, frequencyLowPass, frequencyHighPass);
+    greenLevelAfterFilter = printMagnitudeCircleBandReject(greenLevel,dims, frequencyLowPass, frequencyHighPass);
+    blueLevelAfterFilter = printMagnitudeCircleBandReject(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+    var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
+    context.putImageData(imgFinal, 0,0);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
+    $("#down"+context.canvas.id).parent("a").show();
+    var duration = +new Date() - start;
+    console.log("setCircle: " + duration + "ms");
+}
 
 
 
@@ -455,28 +471,49 @@ function getLevel(imgMatrix, colorLevel){
 }
 
 
-function printMagnitudeCircle(amplitudes, dims, lowFrequency, highFrequency){
+/***
+ * Print circle on magnitude
+ */
+
+function printMagnitudeCirclePassBand(amplitudes, dims, lowFrequency, highFrequency){
+  var d0 = Math.pow(lowFrequency, 2);
+  var d1 = Math.pow(highFrequency, 2);
+  var N = dims[1];
+  var M = dims[0];
+  var newArray = [];
+  var cont = 0; cont1 = 0;
+  for (var k = 0; k < N; k++) {
+    for (var l = 0; l < M; l++) {
+      var idx = (k*M + l);
+      var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+      if (duv < d0 || duv > d1) {
+          newArray[idx] = 0;
+      }
+      else {
+          newArray[idx] = amplitudes[idx];
+      }
+    }
+  }
+  return newArray;
+}
+
+function printMagnitudeCircleBandReject(amplitudes, dims, lowFrequency, highFrequency){
     console.log(lowFrequency,highFrequency);
     var d0 = Math.pow(lowFrequency, 2);
     var d1 = Math.pow(highFrequency, 2);
     var N = dims[1];
     var M = dims[0];
     var newArray = [];
-    var cont = 0; cont1 = 0;
     for (var k = 0; k < N; k++) {
       for (var l = 0; l < M; l++) {
         var idx = (k*M + l);
         var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-        if (duv < d0 || duv > d1) {
+        if (duv > d0 && duv < d1) {
             newArray[idx] = 0;
-            cont++;
         }
         else {
             newArray[idx] = amplitudes[idx];
-            cont1++;
         }
-        //newArray[idx] = amplitudes.data[idx];
-        //MI DOVREBBE STAMPARE LA ROBA ORIGINALE MA NON ME LA STAMPA. Capire xk, il cerchio funziona.
       }
     }
     return newArray;
