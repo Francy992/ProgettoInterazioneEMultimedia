@@ -1,9 +1,7 @@
-//TODO: inserire doppio slider per filtro speciale.
-//TODO: attivare filtro speciale e risultato nell'immagine accanto.
 //TODO: inserire rumore casuale in un immagine e scaricare il tutto.
 //TODO: controllare come far attivare questo taglio nel caso di gaussiano/butterborth.
-//TODO: Problema con il passabandasetcircle. Se muovo lo slider, cambio "cosa" e ritorno li mi dice che le variabili bandPass sono undefined. Capire che succede.
-//TODO: sistemare il tutto per quando viene cambiata l'immagine.
+//Possiblità di selezionare più di una banda, quindi aggiongere uno slider dinamicamente con un contatore..
+
 //slider: 
 var slider_1 = $("#slider_1").slider({
 	formatter: function(value) {
@@ -37,6 +35,8 @@ $("#slider_2_val").on("change", function(){
 /**
  * PASSBAND SLIDER
  */
+
+
 var sliderBandPass_1 = $("#bandPass_1").slider({
 	formatter: function(value) {
         var sliderLowPassVal = $("#bandPass_1");
@@ -343,13 +343,22 @@ $( document ).ready(function() {
                 } 
                 recalculate1 = false;
             }
-            if(recalculate2){//TODO: Allineare roba nel pulsante
-                if(tipo2 != "butterworth")
-                    window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
-                else {
-                    window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, butterworthOrder2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
+            if(recalculate2){
+                if(tipo2 != "butterworth"){
+                    if(cosa2 == "BandPass" || cosa2 == "BandReject"){
+                        console.log("Bau");
+                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin2, bandPassMax2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
+                    }
+                    else
+                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
                 }
-
+                else{
+                    if(cosa2 == "BandPass" || cosa2 == "BandReject"){
+                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin2, bandPassMax2, butterworthOrder2, context2Riga2, "1° Filtro: " + tipo2+cosa2);
+                    }
+                    else //LOwPass/HighPass No butterworth
+                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, butterworthOrder2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
+                } 
                 recalculate2 = false;
             }
             $('#messageError').text("");
@@ -462,6 +471,15 @@ $( document ).ready(function() {
                         canvas3Magnitude.height = dims[1];
                         context3Magnitude = canvas3Magnitude.getContext("2d");
 
+                        canvas1MagnitudeRiga1.width = dims[0];
+                        canvas1MagnitudeRiga1.height = dims[1];
+                        context1MagnitudeRiga1 = canvas1MagnitudeRiga1.getContext("2d");
+
+                        canvas1MagnitudeRiga2.width = dims[0];
+                        canvas1MagnitudeRiga2.height = dims[1];
+                        context1MagnitudeRiga2 = canvas1MagnitudeRiga2.getContext("2d");
+
+
                         //Get single level of spatial domain
                         redLevel = getLevel(imgMatrixOriginal, 0);
                         greenLevel = getLevel(imgMatrixOriginal, 1);
@@ -476,11 +494,17 @@ $( document ).ready(function() {
                         setMagnitudeSingleChannelToContext(matrixFourierRedLevel, dims, context1Magnitude, "Magnitudo canale rosso."); 
                         setMagnitudeSingleChannelToContext(matrixFourierBlueLevel, dims, context2Magnitude, "Magnitudo canale blue."); 
                         setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
-
+                        redLevelMagnitudoRgb = setMagnitudeSingleChannelToContext(matrixFourierRedLevel, dims, context1Magnitude, "Magnitudo canale rosso."); 
+                        blueLevelMagnitudoRgb = setMagnitudeSingleChannelToContext(matrixFourierBlueLevel, dims, context2Magnitude, "Magnitudo canale blue."); 
+                        greenLevelMagnitudoRgb = setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
+                        setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, 0, frequency1, context1MagnitudeRiga1, "Circle of frequency");
+                        setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, 0, frequency1, context1MagnitudeRiga2, "Circle of frequency");
+                        
                         //reupload = true;
                         recalculate1 = true;
                         recalculate2 = true;
                         $('#spinner').hide(); 
+                        $('').show();
                     }, 400);
                 }
             }
@@ -498,6 +522,13 @@ $( document ).ready(function() {
         $("#slider_1").slider('refresh');
         $("#slider_2").slider('setAttribute', 'max', val);
         $("#slider_2").slider('refresh');
+        $("#bandPass_1").slider('setAttribute', 'max', val);
+        $("#bandPass_1").slider('refresh');
+        $("#bandPass_2").slider('setAttribute', 'max', val);
+        $("#bandPass_2").slider('refresh');
+        $("#bandPass_1_max").text(val);
+        $("#bandPass_2_max").text(val);
+
         frequency1 = 1;
         frequency2 = 1;
     }

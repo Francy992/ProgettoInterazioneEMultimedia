@@ -388,8 +388,6 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
 
 
 
-
-
     /**
      * 
      *  Support function
