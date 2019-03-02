@@ -260,7 +260,6 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequencyLow, freq
     greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
     blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
-    console.log(imgFinal)
     context.putImageData(imgFinal, 0,0);
     $("#"+context.canvas.id).prev().text(message);     
     $("#down"+context.canvas.id+" span").text("Download " + message);     
@@ -384,7 +383,35 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
     console.log("setCircle: " + duration + "ms");
 }
 
-
+//Modify inizial matrix
+function setCirclePassBandModify(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
+  var start = new Date();
+  redLevel = printMagnitudeCirclePassBand(redLevel, dims, frequencyLowPass, frequencyHighPass);
+  greenLevel = printMagnitudeCirclePassBand(greenLevel,dims, frequencyLowPass, frequencyHighPass);
+  greenLevel = printMagnitudeCirclePassBand(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+  var imgFinal = makeImage(redLevel, greenLevel, greenLevel, dims); 
+  context.putImageData(imgFinal, 0,0);
+  $("#"+context.canvas.id).prev().text(message);     
+  $("#down"+context.canvas.id+" span").text("Download " + message);     
+  $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
+  $("#down"+context.canvas.id).parent("a").show();
+  var duration = +new Date() - start;
+  console.log("setCircleBandPassModify: " + duration + "ms");
+}
+function setCircleBandRejectModify(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
+  var start = new Date();
+  redLevel = printMagnitudeCircleBandReject(redLevel, dims, frequencyLowPass, frequencyHighPass);
+  greenLevel = printMagnitudeCircleBandReject(greenLevel,dims, frequencyLowPass, frequencyHighPass);
+  blueLevel = printMagnitudeCircleBandReject(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+  var imgFinal = makeImage(redLevel, greenLevel, blueLevel, dims); 
+  context.putImageData(imgFinal, 0,0);
+  $("#"+context.canvas.id).prev().text(message);     
+  $("#down"+context.canvas.id+" span").text("Download " + message);     
+  $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
+  $("#down"+context.canvas.id).parent("a").show();
+  var duration = +new Date() - start;
+  console.log("setCircleBandRejectModify: " + duration + "ms");
+}
 
 
 
@@ -484,14 +511,23 @@ function printMagnitudeCirclePassBand(amplitudes, dims, lowFrequency, highFreque
     for (var l = 0; l < M; l++) {
       var idx = (k*M + l);
       var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-      if (duv < d0 || duv > d1) {
+      cont++;
+      for(var i = 0; i < lowFrequency.length; i++){
+        if(duv < lowFrequency[i] || duv > highFrequency[i]){
           newArray[idx] = 0;
+          break;
+        }
+        else{
+          newArray[idx] = amplitudes[idx];
+        }
+      }
+      /*if (duv < d0 || duv > d1) {
       }
       else {
-          newArray[idx] = amplitudes[idx];
-      }
+      }*/
     }
   }
+  console.log("Numero di cicli: " + cont);
   return newArray;
 }
 
