@@ -1,6 +1,10 @@
 //TODO: inserire rumore casuale in un immagine e scaricare il tutto.
 //TODO: controllare come far attivare questo taglio nel caso di gaussiano/butterborth.
 //TODO: Fare in modo che gli slider passabanda funzionino con glli array, compreso la funzione che applica il filtro.
+//TODO: Non si aggiorna il valore del testo nello slider doppio.
+//TODO: Da sistemare i passabanda e il setCirclePassaBanda.
+
+
 var bandPassMin1 = [];
     bandPassMin1[0] = 0;
 var bandPassMax1 = [];
@@ -336,14 +340,14 @@ $( document ).ready(function() {
                 if(tipo1 != "butterworth"){
                     if(cosa1 == "BandPass" || cosa1 == "BandReject"){
                         console.log("Bau");
-                        window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin1[0], bandPassMax1[0], context1Riga2, "1° Filtro: " + tipo1+cosa1);
+                        window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin1, bandPassMax1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
                     }
                     else
                         window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
                 }
                 else{
                     if(cosa1 == "BandPass" || cosa1 == "BandReject"){
-                        window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin1[0], bandPassMax1[0], butterworthOrder1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
+                        window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin1, bandPassMax1, butterworthOrder1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
                     }
                     else //LOwPass/HighPass No butterworth
                         window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency1, butterworthOrder1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
@@ -354,14 +358,14 @@ $( document ).ready(function() {
                 if(tipo2 != "butterworth"){
                     if(cosa2 == "BandPass" || cosa2 == "BandReject"){
                         console.log("Bau");
-                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin2[0], bandPassMax2[0], context2Riga2, "2° Filtro: " + tipo2+cosa2);
+                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin2, bandPassMax2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
                     }
                     else
                         window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
                 }
                 else{
                     if(cosa2 == "BandPass" || cosa2 == "BandReject"){
-                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin2[0], bandPassMax2[0], butterworthOrder2, context2Riga2, "1° Filtro: " + tipo2+cosa2);
+                        window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin2, bandPassMax2, butterworthOrder2, context2Riga2, "1° Filtro: " + tipo2+cosa2);
                     }
                     else //LOwPass/HighPass No butterworth
                         window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, frequency2, butterworthOrder2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
@@ -583,6 +587,7 @@ function addSlider(){
     //Inizialize array position
     bandPassMin1[contSlider] = 0;
     bandPassMax1[contSlider] = dims[1];
+    //TODO: Inizializza gli altri slider
     //Register the slider
     window["sliderBandPass_1_"+contSlider] = $("#bandPass_1_"+contSlider).slider({
         formatter: function(value) {
