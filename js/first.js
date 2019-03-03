@@ -1,7 +1,6 @@
 //TODO: inserire rumore casuale in un immagine e scaricare il tutto.
 //TODO: controllare come far attivare questo taglio nel caso di gaussiano/butterborth.
-//Possiblità di selezionare più di una banda, quindi aggiongere uno slider dinamicamente con un contatore..
-
+//TODO: Fare in modo che gli slider passabanda funzionino con glli array, compreso la funzione che applica il filtro.
 var bandPassMin1 = [];
     bandPassMin1[0] = 0;
 var bandPassMax1 = [];

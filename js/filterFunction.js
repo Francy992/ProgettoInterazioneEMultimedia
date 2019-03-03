@@ -501,8 +501,7 @@ function getLevel(imgMatrix, colorLevel){
  */
 
 function printMagnitudeCirclePassBand(amplitudes, dims, lowFrequency, highFrequency){
-  var d0 = Math.pow(lowFrequency, 2);
-  var d1 = Math.pow(highFrequency, 2);
+  
   var N = dims[1];
   var M = dims[0];
   var newArray = [];
@@ -513,7 +512,9 @@ function printMagnitudeCirclePassBand(amplitudes, dims, lowFrequency, highFreque
       var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
       cont++;
       for(var i = 0; i < lowFrequency.length; i++){
-        if(duv < lowFrequency[i] || duv > highFrequency[i]){
+        var d0 = Math.pow(lowFrequency[i], 2);
+        var d1 = Math.pow(highFrequency[i], 2);
+        if(duv < d0 || duv > d1){
           newArray[idx] = 0;
           break;
         }
@@ -542,12 +543,23 @@ function printMagnitudeCircleBandReject(amplitudes, dims, lowFrequency, highFreq
       for (var l = 0; l < M; l++) {
         var idx = (k*M + l);
         var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-        if (duv > d0 && duv < d1) {
+        for(var i = 0; i < lowFrequency.length; i++){
+          var d0 = Math.pow(lowFrequency[i], 2);
+          var d1 = Math.pow(highFrequency[i], 2);
+          if(duv > d0 && duv < d1){
+            newArray[idx] = 0;
+            break;
+          }
+          else{
+            newArray[idx] = amplitudes[idx];
+          }
+        }
+        /*if (duv > d0 && duv < d1) {
             newArray[idx] = 0;
         }
         else {
             newArray[idx] = amplitudes[idx];
-        }
+        }*/
       }
     }
     return newArray;
