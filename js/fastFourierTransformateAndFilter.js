@@ -389,8 +389,6 @@ function filterButterworthLowPass(amplitudes, dims, cutFrequency, order) {
 
   function filterButterworthBandReject(amplitudes, dims, lowPassFrequency, highPassFrequency, order) {
     console.log(lowPassFrequency);
-    var lowPassSq = Math.pow(lowPassFrequency, 2);
-    var highPassSq = Math.pow(highPassFrequency, 2);
     var N = dims[1];
     var M = dims[0];
     var newArray = [];
@@ -458,7 +456,7 @@ function ordina(array1,array2){
   do{
     continua=false
     for(i=1;i<v1.length;i++)
-      if(v1[i]<v1[i-1]){
+      if(v1[i]>v1[i-1]){
         t1 = v1[i]
         t2 = v2[i]
         v1[i]=v1[i-1]
@@ -490,7 +488,7 @@ function filterGaussianBandPass(amplitudes, dims, lowPassFrequency, highPassFreq
   var lowPass = lowPassFrequency.clone();
   var highPass = highPassFrequency.clone();
   ordina(lowPass, highPass);
-  console.log(lowPass);console.log(highPass);
+  console.log("Ordinati sono: ", lowPass, highPass);
   var N = dims[1];
   var M = dims[0];
   var newArray = [];
@@ -499,7 +497,7 @@ function filterGaussianBandPass(amplitudes, dims, lowPassFrequency, highPassFreq
       var idx = k*M + l;
       var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
       var huv1 = 0; var huv = 0;
-      for(var i = 0; i<lowPass.length;i++){
+      /*for(var i = 0; i<lowPass.length;i++){
         var lowPassSq = Math.pow(lowPass[i], 2);
         var highPassSq = Math.pow(highPass[i], 2);
         if((2*highPassSq*highPassSq) != 0)
@@ -511,7 +509,44 @@ function filterGaussianBandPass(amplitudes, dims, lowPassFrequency, highPassFreq
           newArray[idx] = new Complex(amplitudes[idx].re*huv2, amplitudes[idx].im*huv2);
         else 
           newArray[idx] = new Complex(newArray[idx].re*huv2, newArray[idx].im*huv2);
-      }
+      }*/
+      var huvMax = 0; var huvArray = [];
+      for(var i = 0; i<lowPass.length;i++){
+          huvArray[i] = 0;
+        //case huvMax
+        if(i == 0){
+            var highPassSq = Math.pow(highPass[i], 2);
+            if((2*highPassSq*highPassSq) != 0)
+            huvMax = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
+        }
+
+        var lowPassSq = Math.pow(lowPass[i], 2);
+        var highPassSqNext = 0;
+        var huvMaxNext = 0;
+
+        if(i != (lowPass.length-1)){
+            highPassSqNext = Math.pow(highPass[i+1], 2);
+            if((2*highPassSqNext*highPassSqNext) != 0)
+            huvMaxNext = Math.pow(Math.E, (-(duv*duv)/(2*highPassSqNext*highPassSqNext)));
+        }
+        if ((2*lowPassSq*lowPassSq) != 0)
+            huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
+        //next max for get difference
+        if((lowPass[i]-highPass[i+1]) > 0 )
+            huvArray[i] = (huv - huvMaxNext);
+    }
+    for(var i = 0; i<huvArray.length;i++)
+        huvMax -= huvArray[i];
+        /*var lowPassSq = Math.pow(lowPassFrequency[i], 2);
+        var highPassSq = Math.pow(highPassFrequency[i], 2);
+        if((2*highPassSq*highPassSq) != 0)
+        huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
+        if ((2*lowPassSq*lowPassSq) != 0)
+            huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
+        var huv2 = (huv1-huv);
+    }    */
+      newArray[idx] = new Complex(amplitudes[idx].re*huvMax, amplitudes[idx].im*huvMax);
+      
       
 
 
