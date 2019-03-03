@@ -511,16 +511,24 @@ function printMagnitudeCirclePassBand(amplitudes, dims, lowFrequency, highFreque
       var idx = (k*M + l);
       var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
       cont++;
+      var pass = false;
       for(var i = 0; i < lowFrequency.length; i++){
         var d0 = Math.pow(lowFrequency[i], 2);
         var d1 = Math.pow(highFrequency[i], 2);
         if(duv < d0 || duv > d1){
-          newArray[idx] = 0;
+          pass = false;
+        }
+        else{//If we find one frequency that pass then we stop and assign this magnitudo, else we assign zero. TODO: controllare traduzione.
+          pass = true;
           break;
         }
-        else{
-          newArray[idx] = amplitudes[idx];
-        }
+        
+      }
+      if(!pass){
+        newArray[idx] = 0;
+      }
+      else{
+        newArray[idx] = amplitudes[idx];
       }
       /*if (duv < d0 || duv > d1) {
       }
