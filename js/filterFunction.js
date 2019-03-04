@@ -330,11 +330,54 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
     return colorLevelAfterFilter;
   }
   
-  function setCirclePassBand(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
+
+
+  //TypeFilter: 0==ideal - 1==Gaussian - 2==Butterworth
+  //bandReject: 0 == no bandReject, 1 == yes bandReject
+  function setCirclePassBand(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message, typeFilter, bandReject, order){
+    if(typeFilter == "ideal")
+      typeFilter = 0;
+    else if(typeFilter == "gaussian")
+      typeFilter = 1;
+    else
+      typeFilter = 2;
+
+    if(bandReject == "BandReject")
+      bandReject = 1;
+    else 
+      bandReject = 0;
+    
+    var start = new Date();
+    if(typeFilter == 0){   
+      redLevelAfterFilter = printMagnitudeCircleIdealPassBand(redLevel, dims, frequencyLowPass, frequencyHighPass);
+      greenLevelAfterFilter = printMagnitudeCircleIdealPassBand(greenLevel,dims, frequencyLowPass, frequencyHighPass);
+      blueLevelAfterFilter = printMagnitudeCircleIdealPassBand(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+    }
+    else if(typeFilter == 1){
+      redLevelAfterFilter = printMagnitudeCircleGaussian(redLevel, dims, frequencyLowPass, frequencyHighPass, bandReject);
+      greenLevelAfterFilter = printMagnitudeCircleGaussian(greenLevel,dims, frequencyLowPass, frequencyHighPass, bandReject);
+      blueLevelAfterFilter = printMagnitudeCircleGaussian(blueLevel,dims, frequencyLowPass, frequencyHighPass, bandReject);
+    }
+    else{
+      redLevelAfterFilter = printMagnitudeCircleButterworth(redLevel, dims, frequencyLowPass, frequencyHighPass, bandReject, order);
+      greenLevelAfterFilter = printMagnitudeCircleButterworth(greenLevel,dims, frequencyLowPass, frequencyHighPass, bandReject, order);
+      blueLevelAfterFilter = printMagnitudeCircleButterworth(blueLevel,dims, frequencyLowPass, frequencyHighPass, bandReject, order);
+    }
+    var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
+    context.putImageData(imgFinal, 0,0);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
+    $("#down"+context.canvas.id).parent("a").show();
+    var duration = +new Date() - start;
+    console.log("setCircle type:  ", typeFilter + ", duration: " + duration + "ms");
+  }
+
+  /*function setCirclePassBand(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
         var start = new Date();
-        redLevelAfterFilter = printMagnitudeCirclePassBand(redLevel, dims, frequencyLowPass, frequencyHighPass);
-        greenLevelAfterFilter = printMagnitudeCirclePassBand(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-        blueLevelAfterFilter = printMagnitudeCirclePassBand(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+        redLevelAfterFilter = printMagnitudeCircleGaussian(redLevel, dims, frequencyLowPass, frequencyHighPass);
+        greenLevelAfterFilter = printMagnitudeCircleGaussian(greenLevel,dims, frequencyLowPass, frequencyHighPass);
+        blueLevelAfterFilter = printMagnitudeCircleGaussian(blueLevel,dims, frequencyLowPass, frequencyHighPass);
         var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
         context.putImageData(imgFinal, 0,0);
         $("#"+context.canvas.id).prev().text(message);     
@@ -343,14 +386,14 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
         $("#down"+context.canvas.id).parent("a").show();
         var duration = +new Date() - start;
         console.log("setCircle Pass Band: " + duration + "ms");
-  }
+  }*/
 
 
   function setCircleBandReject(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
     var start = new Date();
-    redLevelAfterFilter = printMagnitudeCircleBandReject(redLevel, dims, frequencyLowPass, frequencyHighPass);
-    greenLevelAfterFilter = printMagnitudeCircleBandReject(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-    blueLevelAfterFilter = printMagnitudeCircleBandReject(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+    redLevelAfterFilter = printMagnitudeCircleGaussian(redLevel, dims, frequencyLowPass, frequencyHighPass);
+    greenLevelAfterFilter = printMagnitudeCircleGaussian(greenLevel,dims, frequencyLowPass, frequencyHighPass);
+    blueLevelAfterFilter = printMagnitudeCircleGaussian(blueLevel,dims, frequencyLowPass, frequencyHighPass);
     var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
     context.putImageData(imgFinal, 0,0);
     $("#"+context.canvas.id).prev().text(message);     
@@ -366,13 +409,9 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
 
   function addRandomNoise(redLevel, greenLevel, blueLevel, dims, context, message){
     var start = new Date();
-    console.log(dims);
     var pixelArray = makeImageFromThreeMatrixColorInt(redLevel, greenLevel, blueLevel, dims);
     functionAddRandomNoise(pixelArray);
-    console.log(pixelArray);
-    console.log("Prima di rompersi", dims);
     var imgFinal = makeImageFromOneArrayColor(pixelArray, dims); 
-    console.log(imgFinal);
     context.putImageData(imgFinal, 0,0);
     $("#"+context.canvas.id).prev().text(message);     
     $("#down"+context.canvas.id+" span").text("Download " + message);     
@@ -397,7 +436,6 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
 
   //Make image from three different level color. Return ImageData object.
   function makeImage(redLevel, greenLevel, blueLevel, dims){
-    console.log(dims);
       var start = new Date();
       imgMatrix = new ImageData(dims[0],dims[1]);
       var cont = 0;
@@ -415,7 +453,6 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
 
   //Make image from one array with color. Return ImageData object.
   function makeImageFromOneArrayColor(arrayColor, dims){
-    console.log(dims);
       var start = new Date();
       imgMatrix = new ImageData(dims[0],dims[1]);
       for (i = 0; i <dims[0] * dims[1] * 4; i++) {
@@ -484,7 +521,6 @@ function getLevel(imgMatrix, colorLevel){
  */
 
 function printMagnitudeCircleIdealPassBand(amplitudes, dims, lowFrequency, highFrequency){
-  console.log(amplitudes);
   var N = dims[1];
   var M = dims[0];
   var newArray = [];
@@ -526,30 +562,84 @@ function printMagnitudeCircleIdealPassBand(amplitudes, dims, lowFrequency, highF
   }
   return newArray;
 }
+Array.prototype.clone = function() {
+  var newObj = (this instanceof Array) ? [] : {};
+  for (i in this) {
+      if (i == 'clone') 
+          continue;
+      if (this[i] && typeof this[i] == "object") {
+          newObj[i] = this[i].clone();
+      } 
+      else 
+          newObj[i] = this[i]
+  } return newObj;
+};
 
-
-function printMagnitudeCircleGaussian(amplitudes, dims, lowFrequency, highFrequency){
+function printMagnitudeCircleGaussian(amplitudes, dims, lowFrequency, highFrequency, bandReject){
   var N = dims[1];
   var M = dims[0];
+  var lowPass = []; var highPass = []; var lowPassNew = []; var highPassNew = [];
+  if(lowFrequency.constructor == Array){//BandReject and BandPass case.{
+    lowPass = lowFrequency.clone();
+    highPass = highFrequency.clone();
+    ordinaCrescente(lowPass, highPass);
+    if(!bandReject){//BandPassCase
+      lowPassNew = getNewArrayLow(lowPass,highPass);
+      highPassNew = getNewArrayHigh(lowPass, highPass);
+      lowPass = lowPassNew.clone();
+      highPass = highPassNew.clone();
+      ordinaCrescente(lowPass, highPass);
+    }
+  }  
   var newArray = [];
   for (var k = 0; k < N; k++) {
-    for (var l = 0; l < M; l++) {
-
+    for (var l = 0; l < M; l++) {      
       if(lowFrequency.constructor == Array){//BandReject and BandPass case.{
-
+          var idx = k*M + l;
+          var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+          var huv1 = 0; var huv = 0;        
+        for(var i = 0; i<lowPass.length;i++){
+          var lowPassSq = Math.pow(lowPass[i], 2);
+          var highPassSq = Math.pow(highPass[i], 2);
+          if((2*highPassSq*highPassSq) != 0)
+              huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
+          if ((2*lowPassSq*lowPassSq) != 0)
+              huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
+          var huv2 = 1 - (huv1-huv);
+          if(i == 0)
+            newArray[idx] = parseInt(amplitudes[idx] * huv2);
+          else 
+            newArray[idx] = parseInt(newArray[idx] * huv2);
+        }
       }
       else{//Low/High pass case
-        var idx = (k*M + l);
-        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-        var huv1 = 0; var huv = 0;
-        var lowPassSq = Math.pow(lowFrequency, 2);
-        var highPassSq = Math.pow(highFrequency, 2);
-        if((2*highPassSq*highPassSq) != 0)
-            huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
-        if ((2*lowPassSq*lowPassSq) != 0)
-            huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
-        var huv2 = 1 - (huv1-huv);
-        newArray[idx] = parseInt(amplitudes[idx] * huv2);
+        if(bandReject == 1){
+          var idx = (k*M + l);
+          var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+          var huv1 = 0; var huv = 0;
+          var lowPassSq = Math.pow(lowFrequency, 2);
+          var highPassSq = Math.pow(highFrequency, 2);
+          if((2*highPassSq*highPassSq) != 0)
+              huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
+          if ((2*lowPassSq*lowPassSq) != 0)
+              huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
+          var huv2 = 1 - (huv1-huv);
+          newArray[idx] = parseInt(amplitudes[idx] * huv2);
+        }
+        else {
+          var idx = (k*M + l);
+          var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+          var huv1 = 0; var huv = 0;
+          var lowPassSq = Math.pow(lowFrequency, 2);
+          var highPassSq = Math.pow(highFrequency, 2);
+          if((2*highPassSq*highPassSq) != 0)
+              huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
+          if ((2*lowPassSq*lowPassSq) != 0)
+              huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
+          var huv2 = (huv1-huv);
+          newArray[idx] = parseInt(amplitudes[idx] * huv2);
+        }
+       
       }      
     }
   }
@@ -557,32 +647,78 @@ function printMagnitudeCircleGaussian(amplitudes, dims, lowFrequency, highFreque
 }
 
 
-function printMagnitudeCircleButterworth(amplitudes, dims, lowFrequency, highFrequency){
+
+function printMagnitudeCircleButterworth(amplitudes, dims, lowFrequency, highFrequency, bandReject, order){
   var N = dims[1];
   var M = dims[0];
+  var lowPass = []; var highPass = []; var lowPassNew = []; var highPassNew = [];
+  if(lowFrequency.constructor == Array){//BandReject and BandPass case.{
+    lowPass = lowFrequency.clone();
+    highPass = highFrequency.clone();
+    ordinaCrescente(lowPass, highPass);
+    if(!bandReject){//BandPassCase
+      lowPassNew = getNewArrayLow(lowPass,highPass);
+      highPassNew = getNewArrayHigh(lowPass, highPass);
+      lowPass = lowPassNew.clone();
+      highPass = highPassNew.clone();
+      ordinaCrescente(lowPass, highPass);
+    }
+  }  
   var newArray = [];
   for (var k = 0; k < N; k++) {
-    for (var l = 0; l < M; l++) {
+    for (var l = 0; l < M; l++) {      
       if(lowFrequency.constructor == Array){//BandReject and BandPass case.{
-
+          var idx = k*M + l;
+          var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+          var huv1 = 0; var huv = 0;        
+        for(var i = 0; i<lowPass.length;i++){
+          var lowPassSq = Math.pow(lowPass[i], 2);
+          var highPassSq = Math.pow(highPass[i], 2);
+          if(highPassSq != 0)
+            huv1 = 1/(1+(Math.pow((duv/highPassSq),2*order)));
+          if(lowPassSq != 0)
+            huv =  1/(1+(Math.pow((duv/lowPassSq),2*order)));
+          var huv2 = 1 - (huv1 - huv);
+          if(i == 0)
+            newArray[idx] = parseInt(amplitudes[idx] * huv2);
+          else 
+            newArray[idx] = parseInt(newArray[idx] * huv2);
+        }
       }
       else{//Low/High pass case
-        var idx = (k*M + l);
-        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-        var huv1 = 0; var huv = 0;
-        var lowPassSq = Math.pow(lowFrequency, 2);
-        var highPassSq = Math.pow(highFrequency, 2);
-        if(highPassSq != 0)
-          huv1 = 1/(1+(Math.pow((duv/highPassSq),2*order)));
-        if(lowPassSq != 0)
-          huv =  1/(1+(Math.pow((duv/lowPassSq),2*order)));
-        var huv2 = 1 - (huv1 - huv);
-        newArray[idx] = parseInt(amplitudes[idx] * huv2);
-      }
+        if(bandReject == 1){
+          var idx = (k*M + l);
+          var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+          var huv1 = 0; var huv = 0;
+          var lowPassSq = Math.pow(lowFrequency, 2);
+          var highPassSq = Math.pow(highFrequency, 2);
+          if(highPassSq != 0)
+            huv1 = 1/(1+(Math.pow((duv/highPassSq),2*order)));
+          if(lowPassSq != 0)
+            huv =  1/(1+(Math.pow((duv/lowPassSq),2*order)));
+          var huv2 = 1 - (huv1 - huv);
+          newArray[idx] = parseInt(amplitudes[idx] * huv2);
+        }
+        else {
+          var idx = (k*M + l);
+          var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+          var huv1 = 0; var huv = 0;
+          var lowPassSq = Math.pow(lowFrequency, 2);
+          var highPassSq = Math.pow(highFrequency, 2);
+          if(highPassSq != 0)
+            huv1 = 1/(1+(Math.pow((duv/highPassSq),2*order)));
+          if(lowPassSq != 0)
+            huv =  1/(1+(Math.pow((duv/lowPassSq),2*order)));
+          var huv2 = (huv1 - huv);
+          newArray[idx] = parseInt(amplitudes[idx] * huv2);
+        }        
+      }      
     }
   }
   return newArray;
 }
+
+
 
 
 
