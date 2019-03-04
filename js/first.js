@@ -3,6 +3,7 @@
 //TODO: Fare in modo che gli slider passabanda funzionino con glli array, compreso la funzione che applica il filtro.
 //TODO: Non si aggiorna il valore del testo nello slider doppio.
 //TODO: Da sistemare i passabanda e il setCirclePassaBanda.
+//TODO: Controllareelimina banda  ideale.
 
 
 var bandPassMin1 = [];
