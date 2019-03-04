@@ -79,7 +79,6 @@ function icfft(amplitudes)
  
 function cfft(amplitudes)
 {
-   
   var N = amplitudes.length;
 	if( N <= 1 )
 		return amplitudes;
@@ -191,7 +190,8 @@ function flipRightHalf(transform, dims) {
  * @param {matrix of spatial domain image} amplitudes 
  */
 
-function callCfft(amplitudes, dims){
+function callCfft(amplitudesOriginal, dims){
+    var amplitudes = amplitudesOriginal.clone();
     cfft(amplitudes);
 		amplitudes = shiftFFT(amplitudes, dims);
     return amplitudes;
@@ -247,7 +247,7 @@ function filterLowPassGaussian(amplitudes, dims, cutFrequency) {
       var idx = k*M + l;
       var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
       var huv = Math.pow(Math.E, (-(duv*duv)/(2*d0*d0)));
-     newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
+      newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
     }
   }
   return newArray;
@@ -477,122 +477,6 @@ function filterIdealBandPass(amplitudes, dims, lowPassFrequency, highPassFrequen
   return newArray;
 }
 
-//TODO: Spostarlo sotto
-function ordina(array1,array2){
-  var continua=true
-  var t1,t2
-  var v1 = array1;
-  var v2 = array2;
-  do{
-    continua=false
-    for(i=1;i<v1.length;i++)
-      if(v1[i]>v1[i-1]){
-        t1 = v1[i]
-        t2 = v2[i]
-        v1[i]=v1[i-1]
-        v2[i]=v2[i-1]
-        v1[i-1]=t1
-        v2[i-1]=t2
-        continua=true
-      }
-  }while(continua)
-}
-
-
-
-Array.prototype.clone = function() {
-  var newObj = (this instanceof Array) ? [] : {};
-  for (i in this) {
-      if (i == 'clone') 
-          continue;
-      if (this[i] && typeof this[i] == "object") {
-          newObj[i] = this[i].clone();
-      } 
-      else 
-          newObj[i] = this[i]
-  } return newObj;
-};
-
-
-function getNewArrayLow(lowPass, highPass){
-  var newArrayLow = []; var newArrayHigh = [];
-  if(lowPass.length == 1){
-    newArrayLow[0] = 0;
-    newArrayHigh[0] = lowPass[0];
-    newArrayLow[1] = getMax(highPass);
-    newArrayHigh[1] = dims[0];
-    return newArrayLow;
-  }
-  else {
-    var insideIndex = 0;
-    for(var i = 0; i < lowPass.length-1;i++){
-      if(lowPass[i] == highPass[i])
-        break;   
-      if((lowPass[i+1] - highPass[i]) > 0){
-        newArrayLow[insideIndex] = highPass[i];
-        newArrayHigh[insideIndex] = lowPass[i+1];
-        insideIndex++;
-      }  
-      else{
-        lowPass[i+1] = highPass[i];
-      }     
-    }
-    if(insideIndex == 0){
-      newArrayLow[0] = 0;
-      newArrayHigh[0] = lowPass[0];
-      newArrayLow[1] = getMax(highPass);
-      newArrayHigh[1] = dims[0];
-      console.log("E' zero.");
-    }
-  }
-  return newArrayLow;
-}
-
-function getMax(array){
-  var max = 0;
-  for(var i = 0;i < array.length; i++){
-    if(array[i]> max)
-      max = array[i];
-  }
-  return max;
-}
-
-
-function getNewArrayHigh(lowPass, highPass){
-  var newArrayLow = []; var newArrayHigh = [];
-  if(lowPass.length == 1){
-    newArrayLow[0] = 0;
-    newArrayHigh[0] = lowPass[0];
-    newArrayLow[1] = getMax(highPass);
-    newArrayHigh[1] = dims[0];
-    return newArrayHigh;
-  }
-  else {
-    var insideIndex = 0;
-    for(var i = 0; i < lowPass.length-1;i++){
-      if(lowPass[i] == highPass[i])
-        break;   
-      if((lowPass[i+1] - highPass[i]) > 0){
-        newArrayLow[insideIndex] = highPass[i];
-        newArrayHigh[insideIndex] = lowPass[i+1];
-        insideIndex++;
-      }  
-      else{
-        lowPass[i+1] = highPass[i];
-      }     
-    }
-    if(insideIndex == 0){
-      newArrayLow[0] = 0;
-      newArrayHigh[0] = lowPass[0];
-      newArrayLow[1] = getMax(highPass);
-      newArrayHigh[1] = dims[0];
-      console.log("E' zero.");
-    }
-  }
-  return newArrayHigh;
-}
-
-
 function filterGaussianBandPass(amplitudes, dims, lowPassFrequency, highPassFrequency) {
   var N = dims[1];
   var M = dims[0];
@@ -624,6 +508,8 @@ function filterButterworthBandPass(amplitudes, dims, lowPassFrequency, highPassF
   newArray = filterButterworthBandReject(amplitudes,dims,lowPass,highPass, order);
   return newArray;
 }
+
+
 /**
  * GetMagnitude for single channel - return a matrix of int.
  * @param {matrix of spatial domain image} amplitudes 
@@ -656,148 +542,146 @@ function getMagnitudeImage(amplitudes, dims) {
 }
 
 /**
- * simultaneously apply low pass filter and high pass filter
- * @param {matrix of spatial domain image} amplitudes 
- * @param {dimension of matrix} dims  
- * @param {frequency of cut for lowPass filter} lowPass 
- * @param {frequency of cut for highPass filter} highPass 
+ * 
+ * @param {array of pixel in spacial domain.} pixelArray 
  */
-
-function filterPassInside(amplitudes, dims, lowPass, highPass) {
-  var lowPassSq = Math.pow(lowPass, 2);
-  var highPassSq = Math.pow(highPass, 2);
-  var N = dims[1];
-  var M = dims[0];
-  var newArray = [];
-  for (var k = 0; k < N; k++) {
-    for (var l = 0; l < M; l++) {
-      var idx = k*M + l;
-      var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-      if (
-        duv > lowPassSq && isNaN(highPass) ||
-        duv < highPassSq && isNaN(lowPass) ||
-        duv < lowPassSq && !isNaN(lowPass) && !isNaN(highPass) ||
-        duv > highPassSq && !isNaN(lowPass) && !isNaN(highPass)
-      ) {
-          newArray[idx] = new Complex(0, 0);
-      }
-      else newArray[idx] =  new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
+function functionAddRandomNoise(pixelArray){
+  console.log(pixelArray);
+  var cont = 0; var contCicle = 0;
+  for(var i = 0; i< pixelArray.length; i+=4){
+    contCicle++;
+    var noiseNumber = Math.floor(Math.random() * 50);   
+    var blackOrWhite = Math.floor(Math.random() * 2);  
+    if(noiseNumber == 7){
+      var color = 0;
+      if(blackOrWhite) 
+        color = 0;
+      else  
+        color = 255;
+      pixelArray[i] = color;
+      pixelArray[i+1] = color;
+      pixelArray[i+2] = color;
+      pixelArray[i+3] = 255;
     }
   }
-return newArray;
+  return pixelArray;
+  console.log("Il numero di volte che ho applicato 0 è: ", cont, "il numero di cicli è: ", contCicle);
 }
 
 
 /**
- * PROVE VARIE DA QUI IN POI.
- * @param {*} amplitudes 
- * @param {*} dims 
- * @param {*} cutFrequency 
+ *  SupportFunction
  */
-
-
-  function filterAggiungiBanda(amplitudes, dims, cutFrequency) {
-    var d0 = Math.pow(cutFrequency, 2);
-    var N = dims[1];
-    var M = dims[0];
-    var newArray = [];
-    var cont = 0, cont1=0;
-    for (var k = 0; k < N; k++) {
-      for (var l = 0; l < M; l++) {
-        var idx = k*M + l;
-        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-        //var huv = Math.pow(Math.E, ((2*d0*d0)/-(duv*duv)));
-        //newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
-        if ( (duv > (d0 - cutFrequency/2)) && (duv < (d0 + cutFrequency/2))) {
-          newArray[idx] = new Complex(1000000, 1000000);
-          cont++;
-        }
-        else {
-          newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
-          cont1++;
-        }
+function ordina(array1,array2){
+  var continua=true
+  var t1,t2
+  var v1 = array1;
+  var v2 = array2;
+  do{
+    continua=false
+    for(i=1;i<v1.length;i++)
+      if(v1[i]>v1[i-1]){
+        t1 = v1[i]
+        t2 = v2[i]
+        v1[i]=v1[i-1]
+        v2[i]=v2[i-1]
+        v1[i-1]=t1
+        v2[i-1]=t2
+        continua=true
       }
-    }
-    console.log("FilterAggiungiBanda: " + cont, cont1);
-    return newArray;
-  }
-
-  function filterEliminaBanda(amplitudes, dims, cutFrequency) {
-    var d0 = Math.pow(cutFrequency, 2);
-    var N = dims[1];
-    var M = dims[0];
-    var newArray = [];
-    var cont = 0, cont1=0;
-    for (var k = 0; k < N; k++) {
-      for (var l = 0; l < M; l++) {
-        var idx = k*M + l;
-        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-        //var huv = Math.pow(Math.E, ((2*d0*d0)/-(duv*duv)));
-        //newArray[idx] = new Complex(amplitudes[idx].re*huv, amplitudes[idx].im*huv);
-        if ( (duv > (d0 - cutFrequency/2)) && (duv < (d0 + cutFrequency/2))) {
-          newArray[idx] = new Complex(0, 0);
-          cont++;
-        }
-        else {
-          newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
-          cont1++;
-        }
-      }
-    }
-    console.log("FilterEliminaBanda: " + cont, cont1);
-    return newArray;
-  }
-
-
-
-
-
-
-
-//test code
-//var imaginario = cfft([1,1,1,1,0,0,0,0]);
-//var inverso = icfft(imaginario);
-//console.log( imaginario );
-//console.log( inverso );
-
-
-function aggiungiRumorePeriodico(amplitudes, dims, periodo){
-  var N = dims[1];
-  var M = dims[0];
-  var newArray = [];
-  var cont = 0;
-  for (var k = 0; k < N; k++) {
-    for (var l = 0; l < M; l++) {
-      var idx = k*M + l;
-      var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-      if (duv==periodo) {
-        newArray[idx] = new Complex(500000, 500000);
-        cont++;
-      }
-      else {
-          newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
-      }
-    }
-  }
-  console.log(cont);
-  return newArray;
+  }while(continua)
 }
 
-function eliminaRumorePeriodico(amplitudes, dims, periodo){
-  var N = dims[1];
-  var M = dims[0];
-  var newArray = [];
-  for (var k = 0; k < N; k++) {
-    for (var l = 0; l < M; l++) {
-      var idx = k*M + l;
-      var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-      if (duv==periodo) {
-        newArray[idx] = new Complex(0, 0);
-      }
-      else {
-          newArray[idx] = new Complex(amplitudes[idx].re, amplitudes[idx].im);//falle passare
-      }
+Array.prototype.clone = function() {
+  var newObj = (this instanceof Array) ? [] : {};
+  for (i in this) {
+      if (i == 'clone') 
+          continue;
+      if (this[i] && typeof this[i] == "object") {
+          newObj[i] = this[i].clone();
+      } 
+      else 
+          newObj[i] = this[i]
+  } return newObj;
+};
+
+function getMax(array){
+  var max = 0;
+  for(var i = 0;i < array.length; i++){
+    if(array[i]> max)
+      max = array[i];
+  }
+  return max;
+}
+
+function getNewArrayLow(lowPass, highPass){
+  var newArrayLow = []; var newArrayHigh = [];
+  if(lowPass.length == 1){
+    newArrayLow[0] = 0;
+    newArrayHigh[0] = lowPass[0];
+    newArrayLow[1] = getMax(highPass);
+    newArrayHigh[1] = dims[0];
+    return newArrayLow;
+  }
+  else {
+    var insideIndex = 1;
+    newArrayLow[0] = 0;
+    newArrayHigh[0] = lowPass[0];
+    for(var i = 0; i < lowPass.length-1;i++){
+      if(lowPass[i] == highPass[i])
+        break;   
+      if((lowPass[i+1] - highPass[i]) > 0){
+        newArrayLow[insideIndex] = highPass[i];
+        newArrayHigh[insideIndex] = lowPass[i+1];
+        insideIndex++;
+      }  
+      else{
+        lowPass[i+1] = highPass[i];
+      }     
+    }
+    if(insideIndex == 1){
+      newArrayLow[0] = 0;
+      newArrayHigh[0] = lowPass[0];
+      newArrayLow[1] = getMax(highPass);
+      newArrayHigh[1] = dims[0];
+      console.log("E' zero.");
     }
   }
-  return newArray;
+  return newArrayLow;
+}
+
+function getNewArrayHigh(lowPass, highPass){
+  var newArrayLow = []; var newArrayHigh = [];
+  if(lowPass.length == 1){
+    newArrayLow[0] = 0;
+    newArrayHigh[0] = lowPass[0];
+    newArrayLow[1] = getMax(highPass);
+    newArrayHigh[1] = dims[0];
+    return newArrayHigh;
+  }
+  else {
+    var insideIndex = 1;
+    newArrayLow[0] = 0;
+    newArrayHigh[0] = lowPass[0];
+    for(var i = 0; i < lowPass.length-1;i++){
+      if(lowPass[i] == highPass[i])
+        break;   
+      if((lowPass[i+1] - highPass[i]) > 0){
+        newArrayLow[insideIndex] = highPass[i];
+        newArrayHigh[insideIndex] = lowPass[i+1];
+        insideIndex++;
+      }  
+      else{
+        lowPass[i+1] = highPass[i];
+      }     
+    }
+    if(insideIndex == 1){
+      newArrayLow[0] = 0;
+      newArrayHigh[0] = lowPass[0];
+      newArrayLow[1] = getMax(highPass);
+      newArrayHigh[1] = dims[0];
+      console.log("E' zero.");
+    }
+  }
+  return newArrayHigh;
 }

@@ -1,10 +1,5 @@
 //TODO: inserire rumore casuale in un immagine e scaricare il tutto.
 //TODO: controllare come far attivare questo taglio nel caso di gaussiano/butterborth.
-//TODO: Fare in modo che gli slider passabanda funzionino con glli array, compreso la funzione che applica il filtro.
-//TODO: Non si aggiorna il valore del testo nello slider doppio.
-//TODO: Da sistemare i passabanda e il setCirclePassaBanda.
-//TODO: Controllareelimina banda  ideale.
-
 
 var bandPassMin1 = [];
     bandPassMin1[0] = 0;
@@ -53,16 +48,16 @@ var sliderBandPass_1_0 = $("#bandPass_1").slider({
 	formatter: function(value) {
         var sliderLowPassVal = $("#bandPass_1");
         sliderLowPassVal.val(value);
-        $("#bandPass_1_min").text(bandPassMin1[0]);
-        $("#bandPass_1_max").text(bandPassMax1[0]);
+        $("#bandPass_1_min").html("<b>"+bandPassMin1[0]+"</b>");
+        $("#bandPass_1_max").html("<b>"+bandPassMax1[0])+"</b>";
 	}
 });
 var sliderBandPass_2_0 = $("#bandPass_2").slider({
 	formatter: function(value) {
         var sliderLowPassVal = $("#bandPass_2");
         sliderLowPassVal.val(value);
-        $("#bandPass_2_min").text(bandPassMin2[0]);
-        $("#bandPass_2_max").text(bandPassMax2[0]);
+        $("#bandPass_2_min").html("<b>"+bandPassMin2[0]+"</b>");
+        $("#bandPass_2_max").html("<b>"+bandPassMax2[0]+"</b>");
 	}
 });
 
@@ -187,21 +182,13 @@ $( document ).ready(function() {
         bandPassMin1[0] = val.value.newValue[0];
         bandPassMax1[0] = val.value.newValue[1];
         recalculate1 = true;
-        if(cosa1 == "BandReject"){
-            setCircleBandReject(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin1, bandPassMax1, context1MagnitudeRiga1, "Circle of frequency");
-        }
-        else{
-            setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin1, bandPassMax1, context1MagnitudeRiga1, "Circle of frequency");
-        }
+        printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, "Circle of frequency", 1);
     });
     sliderBandPass_2_0.on("change", function(val){
         bandPassMin2[0] = val.value.newValue[0];
         bandPassMax2[0] = val.value.newValue[1];
         recalculate2 = true;
-        if(cosa2 == "BandReject")
-            setCircleBandReject(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin2, bandPassMax2, context1MagnitudeRiga2, "Circle of frequency");
-        else
-            setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin2, bandPassMax2, context1MagnitudeRiga2, "Circle of frequency");
+        printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga2, "Circle of frequency", 2);   
     });
 
 
@@ -263,12 +250,12 @@ $( document ).ready(function() {
         if(this.value == "BandPass"){//show input n-order
             $("#bandPass_2_col").show();
             $("#slider_2_col").hide();
-            setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin2[0], bandPassMax2[0], context1MagnitudeRiga2, "Circle of frequency");
+            setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin2, bandPassMax2, context1MagnitudeRiga2, "Circle of frequency");
         }
         else if(this.value == "BandReject"){
             $("#bandPass_2_col").show();
             $("#slider_2_col").hide();
-            setCircleBandReject(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin2[0], bandPassMax2[0], context1MagnitudeRiga2, "Circle of frequency");
+            setCircleBandReject(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, bandPassMin2, bandPassMax2, context1MagnitudeRiga2, "Circle of frequency");
         }
         else if(this.value == "LowPass"){
             setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, 0, frequency2, context1MagnitudeRiga2, "Circle of frequency");
@@ -282,13 +269,6 @@ $( document ).ready(function() {
         }
     });
 
-    function mostraTutto(){
-        $("#"+this.id).attr("disabled", true);
-        $("#magnitude").hide();
-        $('#messageError').text("Esecuzione operazione richiesta in corso...");
-        $('#messageError').show();
-        $('#spinner').show();
-    }
 
     /**
      * DOWNLOAD SECTION
@@ -331,6 +311,20 @@ $( document ).ready(function() {
         download.setAttribute("href", image);
     });
 
+    $("#downcanvas1MagnitudeRiga1").on("click", function(){
+        var download = document.getElementById("downloadcanvas1MagnitudeRiga1");
+        var image = document.getElementById("canvas1Magnitude").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    });
+
+    $("#downcanvas1MagnitudeRiga2").on("click", function(){
+        var download = document.getElementById("downloadcanvas1MagnitudeRiga2");
+        var image = document.getElementById("canvas2Magnitude").toDataURL("image/png")
+                    .replace("image/png", "image/octet-stream");
+        download.setAttribute("href", image);
+    });
+
     /**
      * Button go operation listener
      */
@@ -340,7 +334,6 @@ $( document ).ready(function() {
             if(recalculate1){
                 if(tipo1 != "butterworth"){
                     if(cosa1 == "BandPass" || cosa1 == "BandReject"){
-                        console.log("Bau");
                         window[tipo1+cosa1](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin1, bandPassMax1, context1Riga2, "1° Filtro: " + tipo1+cosa1);
                     }
                     else
@@ -358,7 +351,6 @@ $( document ).ready(function() {
             if(recalculate2){
                 if(tipo2 != "butterworth"){
                     if(cosa2 == "BandPass" || cosa2 == "BandReject"){
-                        console.log("Bau");
                         window[tipo2+cosa2](matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, bandPassMin2, bandPassMax2, context2Riga2, "2° Filtro: " + tipo2+cosa2);
                     }
                     else
@@ -373,7 +365,7 @@ $( document ).ready(function() {
                 } 
                 recalculate2 = false;
             }
-            $('#messageError').text("");
+            $('#messageError').html("");
             $('#messageError').hide();
             $('#spinner').hide();
             $("#compare").show();
@@ -414,6 +406,8 @@ $( document ).ready(function() {
         greenLevelMagnitudoRgb = setMagnitudeSingleChannelToContext(matrixFourierGreenLevel, dims, context3Magnitude, "Magnitudo canale verde."); 
         $("#go").removeAttr("disabled");
         $('#spinner').hide(); 
+        //TODO: Commentare questa riga
+        addRandomNoise(redLevel, greenLevel, blueLevel, dims, context1Riga1, "Immagine con rumore casuale Sale e Pepe.");
     }, 400);
        
 
@@ -438,14 +432,14 @@ $( document ).ready(function() {
 
             reader.onloadend = function(){
                 if(imgRiga1.naturalWidth > 1024 || imgRiga1.naturalHeight > 1024){
-                    $('#messageError').text("Le dimensioni dell'immagine sono troppo grandi.");
+                    $('#messageError').html("Le dimensioni dell'immagine sono troppo grandi.");
                     $('#messageError').show();
                     $('#imgRiga1').attr('src', oldSrc);
                 }
                 else{
                     $('#spinner').show(); 
                     setTimeout(function(){
-                        $('#messageError').text("");
+                        $('#messageError').html("");
                         $('#messageError').hide();
                         dims = [imgRiga1.naturalWidth, imgRiga1.naturalHeight];
                         setMaxValue(dims[0]);
@@ -538,12 +532,21 @@ $( document ).ready(function() {
         $("#bandPass_1").slider('refresh');
         $("#bandPass_2").slider('setAttribute', 'max', val);
         $("#bandPass_2").slider('refresh');
-        $("#bandPass_1_max").text(val);
-        $("#bandPass_2_max").text(val);
+        $("#bandPass_1_max").html(val);
+        $("#bandPass_2_max").html(val);
 
         frequency1 = 1;
         frequency2 = 1;
     }
+
+    function mostraTutto(){
+        $("#"+this.id).attr("disabled", true);
+        $("#magnitude").hide();
+        $('#messageError').html("Esecuzione operazione richiesta in corso...");
+        $('#messageError').show();
+        $('#spinner').show();
+    }
+
 
   //LowPass
   //idealLowPass(matrixFourierRedLevel, matrixFourierBlueLevel, matrixFourierGreenLevel, dims, 35, context1Riga2, "Filtro low pass ideale");
@@ -576,66 +579,63 @@ $( document ).ready(function() {
 
 
 
-var contSlider = 1;
-function addSlider(){
-    console.log("Dentro addSlider contSlider vale: " + contSlider);
+var contSlider = []; contSlider[0] = 1; contSlider[1] = 1;
+function addSlider(num){
+    console.log("Dentro addSlider contSlider vale: " + contSlider[num-1]+ ", num vale:", num);
     //Add  html code.
-    var html = '<label for="bandPass_1_'+contSlider+'"><strong>Seleziona le frequenze di taglio del filtro:</strong></label><br/>'+
-                '<span id="bandPass_1_min_'+contSlider+'" style="margin-right:15px;"><b>0</b></span>'+
-                '     <input id="bandPass_1_'+contSlider+'" type="text" class="span2" value="" data-slider-min="0" data-slider-max="'+dims[1]+'" data-slider-step="1" data-slider-value="[0,'+dims[1]+']"/>'+
-                ' <span id="bandPass_1_max_'+contSlider+'" style="margin-left:15px;"><b>'+dims[1]+'</b></span>';
-    $("#bandPass_1_col").prepend(html);
+    var html = '<label for="bandPass_'+num+'_'+contSlider[num-1]+'"><strong>Seleziona le frequenze di taglio del filtro:</strong></label><br/>'+
+                '<span id="bandPass_'+num+'_min_'+contSlider[num-1]+'" style="margin-right:15px;"><b>0</b></span>'+
+                '     <input id="bandPass_'+num+'_'+contSlider[num-1]+'" type="text" class="span2" value="" data-slider-min="0" data-slider-max="'+dims[1]+'" data-slider-step="1" data-slider-value="[0,'+dims[1]+']"/>'+
+                '<span id="bandPass_'+num+'_max_'+contSlider[num-1]+'" style="margin-left:15px;"><b>'+dims[1]+'</b></span>';
+    $("#bandPass_"+num+"_col").prepend(html);
     //Inizialize array position
-    bandPassMin1[contSlider] = 0;
-    bandPassMax1[contSlider] = dims[1];
-    //TODO: Inizializza gli altri slider
+    window["bandPassMin"+num][contSlider[num-1]] = 0;
+    window["bandPassMax"+num][contSlider[num-1]] = dims[1];
     //Register the slider
-    window["sliderBandPass_1_"+contSlider] = $("#bandPass_1_"+contSlider).slider({
+    window["sliderBandPass_"+num+"_"+contSlider[num-1]] = $("#bandPass_"+num+"_"+contSlider[num-1]).slider({
         formatter: function(value) {
-            var sliderLowPassVal = $("#bandPass_1_"+contSlider);
+            var sliderLowPassVal = $("#bandPass_"+num+"_"+contSlider[num-1]);
             sliderLowPassVal.val(value);
-            var pos = this.id.charAt(this.id.length-1);
-            $("#bandPass_1_min_"+contSlider).text(bandPassMin1[""+pos+""]);
-            $("#bandPass_1_max_"+contSlider).text(bandPassMax1[""+pos+""]);
         }
     });
     //Listen change Slider
-    window["sliderBandPass_1_"+contSlider].on("change", function(val){
+    window["sliderBandPass_"+num+"_"+contSlider[num-1]].on("change", function(val){
         var pos = this.id.charAt(this.id.length-1);
-        bandPassMin1[""+pos+""] = val.value.newValue[0];
-        bandPassMax1[""+pos+""] = val.value.newValue[1];
+        window["bandPassMin"+num][pos] = val.value.newValue[0];
+        window["bandPassMax"+num][pos] = val.value.newValue[1];
         recalculate1 = true;
-        console.log("Prima di invocare la funzione ")
-        if(cosa1 == "BandReject"){
-            printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, "Circle of frequency");
-        }
-        else{
-            printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, "Circle of frequency");
-        }
+        $("#bandPass_"+num+"_min_"+pos).html("<b>"+val.value.newValue[0]+"</b>");
+        $("#bandPass_"+num+"_max_"+pos).html("<b>"+val.value.newValue[1]+"</b>");
+        printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, "Circle of frequency", num);
     });
-
-    $("#bandPass_1_"+contSlider).slider('refresh');
-
-    //SLIDER 2
-    
-    
-
-
-
-    contSlider++;
+    $("#bandPass_"+num+"_"+contSlider[num-1]).slider('refresh');
+    contSlider[num-1]++;
 }
 
-//TODO: Funzione che chiama i setCircle in base a quanti slider ho aggiunto.
-function printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, message){
+function printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, message, num){
     var redLevelMagnitudo = redLevelMagnitudoRgb;
     var greenLevelMagnitudo = greenLevelMagnitudoRgb;
     var blueLevelMagnitudo = blueLevelMagnitudoRgb;
-    if(cosa1 == "BandReject"){
-        setCircleBandRejectModify(redLevelMagnitudo, greenLevelMagnitudo, blueLevelMagnitudo, dims, bandPassMin1, bandPassMax1, context1MagnitudeRiga1, message);
+    console.log("PrintCircleMultiple");
+    if(num == 1){
+        console.log("Printcirclemultiple", bandPassMin1, bandPassMax1);
+        if(cosa1 == "BandReject"){
+            setCircleBandReject(redLevelMagnitudo, greenLevelMagnitudo, blueLevelMagnitudo, dims, bandPassMin1, bandPassMax1, context1MagnitudeRiga1, message);
+        }
+        else{
+            setCirclePassBand(redLevelMagnitudo, greenLevelMagnitudo, blueLevelMagnitudo, dims, bandPassMin1, bandPassMax1, context1MagnitudeRiga1, message);
+        }
     }
-    else{
-        setCirclePassBandModify(redLevelMagnitudo, redLevelMagnitudo, redLevelMagnitudo, dims, bandPassMin1, bandPassMax1, context1MagnitudeRiga1, message);
+    else {
+        console.log("Else di printcirclemultiple", bandPassMin2, bandPassMax2);
+        if(cosa2 == "BandReject"){
+            setCircleBandReject(redLevelMagnitudo, greenLevelMagnitudo, blueLevelMagnitudo, dims, bandPassMin2, bandPassMax2, context1MagnitudeRiga2, message);
+        }
+        else{
+            setCirclePassBand(redLevelMagnitudo, greenLevelMagnitudo, blueLevelMagnitudo, dims, bandPassMin2, bandPassMax2, context1MagnitudeRiga2, message);
+        }
     }
+    
 
 }
 

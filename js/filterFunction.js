@@ -287,28 +287,6 @@ function idealBandPass(redLevel, blueLevel, greenLevel, dims, frequencyLow, freq
     console.log("ButterworthBandPass: " + duration + "ms");
   }
   
-
-  function doublePassBand(redLevel, blueLevel, greenLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
-    var start = new Date();
-    redLevelAfterFilter = filterGaussianBandPass(redLevel,dims, frequencyLowPass, frequencyHighPass);
-    blueLevelAfterFilter = filterGaussianBandPass(blueLevel,dims, frequencyLowPass, frequencyHighPass);
-    greenLevelAfterFilter = filterGaussianBandPass(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-    redLevelAfterFilter = callICfft(redLevelAfterFilter, dims);
-    greenLevelAfterFilter = callICfft(greenLevelAfterFilter, dims);
-    blueLevelAfterFilter = callICfft(blueLevelAfterFilter, dims);
-    var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
-    context.putImageData(imgFinal, 0,0);
-    $("#"+context.canvas.id).prev().text(message);     
-    $("#down"+context.canvas.id+" span").text("Download " + message);     
-    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");     
-    $("#down"+context.canvas.id).parent("a").show();
-    var duration = +new Date() - start;
-    console.log("DoublePassBand: " + duration + "ms");
-  }
-
-  
-
-
    /**
  * 
  *  Return magnitude image to color
@@ -364,7 +342,7 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
         $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
         $("#down"+context.canvas.id).parent("a").show();
         var duration = +new Date() - start;
-        console.log("setCircle: " + duration + "ms");
+        console.log("setCircle Pass Band: " + duration + "ms");
   }
 
 
@@ -380,40 +358,29 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
     $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
     $("#down"+context.canvas.id).parent("a").show();
     var duration = +new Date() - start;
-    console.log("setCircle: " + duration + "ms");
-}
-
-//Modify inizial matrix
-function setCirclePassBandModify(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
-  var start = new Date();
-  redLevel = printMagnitudeCirclePassBand(redLevel, dims, frequencyLowPass, frequencyHighPass);
-  greenLevel = printMagnitudeCirclePassBand(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-  greenLevel = printMagnitudeCirclePassBand(blueLevel,dims, frequencyLowPass, frequencyHighPass);
-  var imgFinal = makeImage(redLevel, greenLevel, greenLevel, dims); 
-  context.putImageData(imgFinal, 0,0);
-  $("#"+context.canvas.id).prev().text(message);     
-  $("#down"+context.canvas.id+" span").text("Download " + message);     
-  $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
-  $("#down"+context.canvas.id).parent("a").show();
-  var duration = +new Date() - start;
-  console.log("setCircleBandPassModify: " + duration + "ms");
-}
-function setCircleBandRejectModify(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
-  var start = new Date();
-  redLevel = printMagnitudeCircleBandReject(redLevel, dims, frequencyLowPass, frequencyHighPass);
-  greenLevel = printMagnitudeCircleBandReject(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-  blueLevel = printMagnitudeCircleBandReject(blueLevel,dims, frequencyLowPass, frequencyHighPass);
-  var imgFinal = makeImage(redLevel, greenLevel, blueLevel, dims); 
-  context.putImageData(imgFinal, 0,0);
-  $("#"+context.canvas.id).prev().text(message);     
-  $("#down"+context.canvas.id+" span").text("Download " + message);     
-  $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
-  $("#down"+context.canvas.id).parent("a").show();
-  var duration = +new Date() - start;
-  console.log("setCircleBandRejectModify: " + duration + "ms");
+    console.log("setCircle Band Reject: " + duration + "ms");
 }
 
 
+
+
+  function addRandomNoise(redLevel, greenLevel, blueLevel, dims, context, message){
+    var start = new Date();
+    console.log(dims);
+    var pixelArray = makeImageFromThreeMatrixColorInt(redLevel, greenLevel, blueLevel, dims);
+    functionAddRandomNoise(pixelArray);
+    console.log(pixelArray);
+    console.log("Prima di rompersi", dims);
+    var imgFinal = makeImageFromOneArrayColor(pixelArray, dims); 
+    console.log(imgFinal);
+    context.putImageData(imgFinal, 0,0);
+    $("#"+context.canvas.id).prev().text(message);     
+    $("#down"+context.canvas.id+" span").text("Download " + message);     
+    $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
+    $("#down"+context.canvas.id).parent("a").show();
+    var duration = +new Date() - start;
+    console.log("AddRandomNoise: " + duration + "ms");
+  }
 
     /**
      * 
@@ -427,8 +394,10 @@ function setCircleBandRejectModify(redLevel, greenLevel, blueLevel, dims, freque
      */
 
 
+
   //Make image from three different level color. Return ImageData object.
   function makeImage(redLevel, greenLevel, blueLevel, dims){
+    console.log(dims);
       var start = new Date();
       imgMatrix = new ImageData(dims[0],dims[1]);
       var cont = 0;
@@ -443,6 +412,21 @@ function setCircleBandRejectModify(redLevel, greenLevel, blueLevel, dims, freque
       console.log("MakeImage: " + duration + "ms");
       return imgMatrix;
   }
+
+  //Make image from one array with color. Return ImageData object.
+  function makeImageFromOneArrayColor(arrayColor, dims){
+    console.log(dims);
+      var start = new Date();
+      imgMatrix = new ImageData(dims[0],dims[1]);
+      for (i = 0; i <dims[0] * dims[1] * 4; i++) {
+          imgMatrix.data[i] = arrayColor[i];
+      }
+      var duration = +new Date() - start;
+      console.log("MakeImage: " + duration + "ms");
+      return imgMatrix;
+  }
+
+  
 
   //Make image from three different level color. Return ImageData object.
   function makeImageGreyScale(colorLevel, dims){
@@ -461,24 +445,23 @@ function setCircleBandRejectModify(redLevel, greenLevel, blueLevel, dims, freque
     return imgMatrix;
 }
 
-//Make image from one matrix of color. Return ImageData object.
-function makeImageFromMatrixColorInt(colorLevel, dims){
-    console.log("makeImageFromMatrixColorInt");
-    var start = new Date();
-    imgMatrix = new ImageData(dims[0],dims[1]);
-    var cont = 0;
-    for (i = 0; i < dims[0] * dims[1] * 4; i += 4) {
-        imgMatrix.data[i] = colorLevel[cont];
-        imgMatrix.data[i+1] = colorLevel[cont+1];
-        imgMatrix.data[i+2] = colorLevel[cont+2];
-        imgMatrix.data[i+3] = 255;
-        cont++;
-    }
-    var duration = +new Date() - start;
-    console.log("MakeImage: " + duration + "ms");
-    return imgMatrix;
+
+//Make array of color number from three matrix of color.
+function makeImageFromThreeMatrixColorInt(redLevel, greenLevel, blueLevel, dims){
+  var start = new Date();
+  imgMatrix = [];
+  var cont = 0;
+  for (i = 0; i <dims[0] * dims[1] * 4; i += 4) {
+      imgMatrix[i] = redLevel[cont];
+      imgMatrix[i+1] = greenLevel[cont];
+      imgMatrix[i+2] = blueLevel[cont];
+      imgMatrix[i+3] = 255;
+      cont++;
+  }
+  var duration = +new Date() - start;
+  console.log("MakeImage: " + duration + "ms");
+  return imgMatrix;
 }
-  
 
 //colorLevel: 0 == RedLevel, 1 == GreenLevel, 2==BlueLevel, 3==alphaLevel. imgMatrix is a imageData type.
 function getLevel(imgMatrix, colorLevel){
@@ -500,48 +483,110 @@ function getLevel(imgMatrix, colorLevel){
  * Print circle on magnitude
  */
 
-function printMagnitudeCirclePassBand(amplitudes, dims, lowFrequency, highFrequency){
-  
+function printMagnitudeCircleIdealPassBand(amplitudes, dims, lowFrequency, highFrequency){
+  console.log(amplitudes);
   var N = dims[1];
   var M = dims[0];
   var newArray = [];
-  var cont = 0; cont1 = 0;
   for (var k = 0; k < N; k++) {
     for (var l = 0; l < M; l++) {
       var idx = (k*M + l);
       var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
-      cont++;
       var pass = false;
-      for(var i = 0; i < lowFrequency.length; i++){
-        var d0 = Math.pow(lowFrequency[i], 2);
-        var d1 = Math.pow(highFrequency[i], 2);
+      if(lowFrequency.constructor == Array){//BandReject and BandPass case.
+        for(var i = 0; i < lowFrequency.length; i++){
+          var d0 = Math.pow(lowFrequency[i], 2);
+          var d1 = Math.pow(highFrequency[i], 2);
+          if(duv < d0 || duv > d1){
+            pass = false;
+          }
+          else{//If we find one frequency that pass then we stop and assign this magnitudo, else we assign zero. 
+            pass = true;
+            break;
+          }          
+        }
+        if(!pass){
+          newArray[idx] = 0;
+        }
+        else{
+          newArray[idx] = amplitudes[idx];
+        }
+      }
+      else{//LowPass and HighPass case
+        var d0 = Math.pow(lowFrequency, 2);
+        var d1 = Math.pow(highFrequency, 2);
         if(duv < d0 || duv > d1){
-          pass = false;
+          newArray[idx] = 0;
         }
-        else{//If we find one frequency that pass then we stop and assign this magnitudo, else we assign zero. TODO: controllare traduzione.
-          pass = true;
-          break;
+        else{//If we find one frequency that pass then we stop and assign this magnitudo, else we assign zero. 
+          newArray[idx] = amplitudes[idx];
         }
-        
       }
-      if(!pass){
-        newArray[idx] = 0;
-      }
-      else{
-        newArray[idx] = amplitudes[idx];
-      }
-      /*if (duv < d0 || duv > d1) {
-      }
-      else {
-      }*/
     }
   }
-  console.log("Numero di cicli: " + cont);
   return newArray;
 }
 
+
+function printMagnitudeCircleGaussian(amplitudes, dims, lowFrequency, highFrequency){
+  var N = dims[1];
+  var M = dims[0];
+  var newArray = [];
+  for (var k = 0; k < N; k++) {
+    for (var l = 0; l < M; l++) {
+
+      if(lowFrequency.constructor == Array){//BandReject and BandPass case.{
+
+      }
+      else{//Low/High pass case
+        var idx = (k*M + l);
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var huv1 = 0; var huv = 0;
+        var lowPassSq = Math.pow(lowFrequency, 2);
+        var highPassSq = Math.pow(highFrequency, 2);
+        if((2*highPassSq*highPassSq) != 0)
+            huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
+        if ((2*lowPassSq*lowPassSq) != 0)
+            huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
+        var huv2 = 1 - (huv1-huv);
+        newArray[idx] = parseInt(amplitudes[idx] * huv2);
+      }      
+    }
+  }
+  return newArray;
+}
+
+
+function printMagnitudeCircleButterworth(amplitudes, dims, lowFrequency, highFrequency){
+  var N = dims[1];
+  var M = dims[0];
+  var newArray = [];
+  for (var k = 0; k < N; k++) {
+    for (var l = 0; l < M; l++) {
+      if(lowFrequency.constructor == Array){//BandReject and BandPass case.{
+
+      }
+      else{//Low/High pass case
+        var idx = (k*M + l);
+        var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
+        var huv1 = 0; var huv = 0;
+        var lowPassSq = Math.pow(lowFrequency, 2);
+        var highPassSq = Math.pow(highFrequency, 2);
+        if(highPassSq != 0)
+          huv1 = 1/(1+(Math.pow((duv/highPassSq),2*order)));
+        if(lowPassSq != 0)
+          huv =  1/(1+(Math.pow((duv/lowPassSq),2*order)));
+        var huv2 = 1 - (huv1 - huv);
+        newArray[idx] = parseInt(amplitudes[idx] * huv2);
+      }
+    }
+  }
+  return newArray;
+}
+
+
+
 function printMagnitudeCircleBandReject(amplitudes, dims, lowFrequency, highFrequency){
-    console.log(lowFrequency,highFrequency);
     var d0 = Math.pow(lowFrequency, 2);
     var d1 = Math.pow(highFrequency, 2);
     var N = dims[1];
