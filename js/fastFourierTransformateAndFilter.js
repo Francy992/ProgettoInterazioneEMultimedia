@@ -34,20 +34,6 @@ Complex.prototype.cexp = function(dst)
 	dst.im = er * Math.sin(this.im);
 	return dst;
 }
-Complex.prototype.log = function()
-{
-	/*
-	although 'It's just a matter of separating out the real and imaginary parts of jw.' is not a helpful quote
-	the actual formula I found here and the rest was just fiddling / testing and comparing with correct results.
-	http://cboard.cprogramming.com/c-programming/89116-how-implement-complex-exponential-functions-c.html#post637921
-	*/
-	if( !this.re )
-		console.log(this.im.toString()+'j');
-	else if( this.im < 0 )
-		console.log(this.re.toString()+this.im.toString()+'j');
-	else
-		console.log(this.re.toString()+'+'+this.im.toString()+'j');
-}
 
 /**
  * @param {matrix of spatial domain image} amplitudes 
@@ -417,7 +403,6 @@ function filterButterworthLowPass(amplitudes, dims, cutFrequency, order) {
           }          
         }
       }   
-      console.log("Ho eseguito",cont,"operazioni");
       return newArray;
   }
 
@@ -468,10 +453,8 @@ function filterIdealBandPass(amplitudes, dims, lowPassFrequency, highPassFrequen
   var lowPass2 = lowPassFrequency.clone();
   var highPass2 = highPassFrequency.clone();
   ordinaCrescente(lowPass2, highPass2);
-  console.log("ArrayOrdinatao: ", lowPass2, highPass2);
   var lowPass = getNewArrayLow(lowPass2,highPass2);
   var highPass = getNewArrayHigh(lowPass2, highPass2);
-  console.log("Nuovi array: ", lowPass, highPass);
   var newArray = [];var cont = 0;
   newArray = filterIdealBandReject(amplitudes,dims,lowPass,highPass);
   return newArray;
@@ -484,10 +467,8 @@ function filterGaussianBandPass(amplitudes, dims, lowPassFrequency, highPassFreq
   var lowPass2 = lowPassFrequency.clone();
   var highPass2 = highPassFrequency.clone();
   ordinaCrescente(lowPass2, highPass2);
-  console.log("ArrayOrdinatao: ", lowPass2, highPass2);
   var lowPass = getNewArrayLow(lowPass2,highPass2);
   var highPass = getNewArrayHigh(lowPass2, highPass2);
-  console.log("Nuovi array: ", lowPass, highPass);
   var newArray = [];var cont = 0;
   newArray = filterGaussianBandReject(amplitudes,dims,lowPass,highPass);
   return newArray;
@@ -500,10 +481,8 @@ function filterButterworthBandPass(amplitudes, dims, lowPassFrequency, highPassF
   var lowPass2 = lowPassFrequency.clone();
   var highPass2 = highPassFrequency.clone();
   ordinaCrescente(lowPass2, highPass2);
-  console.log("ArrayOrdinatao: ", lowPass2, highPass2);
   var lowPass = getNewArrayLow(lowPass2,highPass2);
   var highPass = getNewArrayHigh(lowPass2, highPass2);
-  console.log("Nuovi array: ", lowPass, highPass);
   var newArray = [];var cont = 0;
   newArray = filterButterworthBandReject(amplitudes,dims,lowPass,highPass, order);
   return newArray;
@@ -546,7 +525,6 @@ function getMagnitudeImage(amplitudes, dims) {
  * @param {array of pixel in spacial domain.} pixelArray 
  */
 function functionAddRandomNoise(pixelArray){
-  console.log(pixelArray);
   var cont = 0; var contCicle = 0;
   for(var i = 0; i< pixelArray.length; i+=4){
     contCicle++;
@@ -565,7 +543,6 @@ function functionAddRandomNoise(pixelArray){
     }
   }
   return pixelArray;
-  console.log("Il numero di volte che ho applicato 0 è: ", cont, "il numero di cicli è: ", contCicle);
 }
 
 
@@ -644,7 +621,6 @@ function getNewArrayLow(lowPass, highPass){
       newArrayHigh[0] = lowPass[0];
       newArrayLow[1] = getMax(highPass);
       newArrayHigh[1] = dims[0];
-      console.log("E' zero.");
     }
   }
   return newArrayLow;
@@ -680,7 +656,6 @@ function getNewArrayHigh(lowPass, highPass){
       newArrayHigh[0] = lowPass[0];
       newArrayLow[1] = getMax(highPass);
       newArrayHigh[1] = dims[0];
-      console.log("E' zero.");
     }
   }
   return newArrayHigh;

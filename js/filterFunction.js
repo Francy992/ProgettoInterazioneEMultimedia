@@ -342,16 +342,15 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
     else
       typeFilter = 2;
 
-    if(bandReject == "BandReject")
+    if(bandReject == "BandReject" || bandReject == "HighPass")
       bandReject = 1;
     else 
       bandReject = 0;
-    
     var start = new Date();
     if(typeFilter == 0){   
-      redLevelAfterFilter = printMagnitudeCircleIdealPassBand(redLevel, dims, frequencyLowPass, frequencyHighPass);
-      greenLevelAfterFilter = printMagnitudeCircleIdealPassBand(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-      blueLevelAfterFilter = printMagnitudeCircleIdealPassBand(blueLevel,dims, frequencyLowPass, frequencyHighPass);
+      redLevelAfterFilter = printMagnitudeCircleIdealPassBand(redLevel, dims, frequencyLowPass, frequencyHighPass, bandReject);
+      greenLevelAfterFilter = printMagnitudeCircleIdealPassBand(greenLevel,dims, frequencyLowPass, frequencyHighPass, bandReject);
+      blueLevelAfterFilter = printMagnitudeCircleIdealPassBand(blueLevel,dims, frequencyLowPass, frequencyHighPass, bandReject);
     }
     else if(typeFilter == 1){
       redLevelAfterFilter = printMagnitudeCircleGaussian(redLevel, dims, frequencyLowPass, frequencyHighPass, bandReject);
@@ -372,22 +371,6 @@ function setMagnitudeSingleChannelToContext(colorLevel, dims, context, message){
     var duration = +new Date() - start;
     console.log("setCircle type:  ", typeFilter + ", duration: " + duration + "ms");
   }
-
-  /*function setCirclePassBand(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
-        var start = new Date();
-        redLevelAfterFilter = printMagnitudeCircleGaussian(redLevel, dims, frequencyLowPass, frequencyHighPass);
-        greenLevelAfterFilter = printMagnitudeCircleGaussian(greenLevel,dims, frequencyLowPass, frequencyHighPass);
-        blueLevelAfterFilter = printMagnitudeCircleGaussian(blueLevel,dims, frequencyLowPass, frequencyHighPass);
-        var imgFinal = makeImage(redLevelAfterFilter, greenLevelAfterFilter, blueLevelAfterFilter, dims); 
-        context.putImageData(imgFinal, 0,0);
-        $("#"+context.canvas.id).prev().text(message);     
-        $("#down"+context.canvas.id+" span").text("Download " + message);     
-        $("#down"+context.canvas.id).parent("a").attr("download",message+".png");
-        $("#down"+context.canvas.id).parent("a").show();
-        var duration = +new Date() - start;
-        console.log("setCircle Pass Band: " + duration + "ms");
-  }*/
-
 
   function setCircleBandReject(redLevel, greenLevel, blueLevel, dims, frequencyLowPass, frequencyHighPass, context, message){
     var start = new Date();
@@ -520,7 +503,7 @@ function getLevel(imgMatrix, colorLevel){
  * Print circle on magnitude
  */
 
-function printMagnitudeCircleIdealPassBand(amplitudes, dims, lowFrequency, highFrequency){
+function printMagnitudeCircleIdealPassBand(amplitudes, dims, lowFrequency, highFrequency, bandReject){
   var N = dims[1];
   var M = dims[0];
   var newArray = [];
@@ -530,27 +513,50 @@ function printMagnitudeCircleIdealPassBand(amplitudes, dims, lowFrequency, highF
       var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
       var pass = false;
       if(lowFrequency.constructor == Array){//BandReject and BandPass case.
-        for(var i = 0; i < lowFrequency.length; i++){
-          var d0 = Math.pow(lowFrequency[i], 2);
-          var d1 = Math.pow(highFrequency[i], 2);
-          if(duv < d0 || duv > d1){
-            pass = false;
+        if(bandReject == 0){//passBand
+          for(var i = 0; i < lowFrequency.length; i++){
+            var d0 = Math.pow(lowFrequency[i], 2);
+            var d1 = Math.pow(highFrequency[i], 2);
+            if(duv < d0 || duv > d1){
+              pass = false;
+            }
+            else{//If we find one frequency that pass then we stop and assign this magnitudo, else we assign zero. 
+              pass = true;
+              break;
+            }          
           }
-          else{//If we find one frequency that pass then we stop and assign this magnitudo, else we assign zero. 
-            pass = true;
-            break;
-          }          
+          if(!pass){
+            newArray[idx] = 0;
+          }
+          else{
+            newArray[idx] = amplitudes[idx];
+          }
         }
-        if(!pass){
-          newArray[idx] = 0;
-        }
-        else{
-          newArray[idx] = amplitudes[idx];
-        }
+        else{//BandReject
+          for(var i = 0; i < lowFrequency.length; i++){
+            var d0 = Math.pow(lowFrequency[i], 2);
+            var d1 = Math.pow(highFrequency[i], 2);
+            if(duv > d0 && duv < d1){
+              newArray[idx] = 0;
+              break;
+            }
+            else{//If we find one frequency that pass then we stop and assign this magnitudo, else we assign zero. 
+              newArray[idx] = amplitudes[idx];
+            }          
+          }
+        }        
       }
       else{//LowPass and HighPass case
-        var d0 = Math.pow(lowFrequency, 2);
-        var d1 = Math.pow(highFrequency, 2);
+        var d0 = 0; var d1 = 0;
+        if(bandReject == 1){//HighPass case
+          d0 = Math.pow(highFrequency, 2);
+          d1 = Math.pow(dims[1], 2);
+        }
+        else{
+          d0 = Math.pow(0, 2);
+          d1 = Math.pow(highFrequency, 2);
+        }
+        
         if(duv < d0 || duv > d1){
           newArray[idx] = 0;
         }
@@ -617,20 +623,20 @@ function printMagnitudeCircleGaussian(amplitudes, dims, lowFrequency, highFreque
           var idx = (k*M + l);
           var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
           var huv1 = 0; var huv = 0;
-          var lowPassSq = Math.pow(lowFrequency, 2);
-          var highPassSq = Math.pow(highFrequency, 2);
+          var lowPassSq = Math.pow(highFrequency, 2);
+          var highPassSq = Math.pow(dims[1], 2);
           if((2*highPassSq*highPassSq) != 0)
               huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
           if ((2*lowPassSq*lowPassSq) != 0)
               huv =  Math.pow(Math.E, (-(duv*duv)/(2*lowPassSq*lowPassSq)));
-          var huv2 = 1 - (huv1-huv);
+          var huv2 = (huv1-huv);
           newArray[idx] = parseInt(amplitudes[idx] * huv2);
         }
         else {
           var idx = (k*M + l);
           var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
           var huv1 = 0; var huv = 0;
-          var lowPassSq = Math.pow(lowFrequency, 2);
+          var lowPassSq = Math.pow(0, 2);
           var highPassSq = Math.pow(highFrequency, 2);
           if((2*highPassSq*highPassSq) != 0)
               huv1 = Math.pow(Math.E, (-(duv*duv)/(2*highPassSq*highPassSq)));
@@ -690,20 +696,20 @@ function printMagnitudeCircleButterworth(amplitudes, dims, lowFrequency, highFre
           var idx = (k*M + l);
           var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
           var huv1 = 0; var huv = 0;
-          var lowPassSq = Math.pow(lowFrequency, 2);
-          var highPassSq = Math.pow(highFrequency, 2);
+          var lowPassSq = Math.pow(highFrequency, 2);
+          var highPassSq = Math.pow(dims[1], 2);
           if(highPassSq != 0)
             huv1 = 1/(1+(Math.pow((duv/highPassSq),2*order)));
           if(lowPassSq != 0)
             huv =  1/(1+(Math.pow((duv/lowPassSq),2*order)));
-          var huv2 = 1 - (huv1 - huv);
+          var huv2 = (huv1 - huv);
           newArray[idx] = parseInt(amplitudes[idx] * huv2);
         }
         else {
           var idx = (k*M + l);
           var duv = Math.pow(k-M/2, 2) + Math.pow(l-N/2, 2);
           var huv1 = 0; var huv = 0;
-          var lowPassSq = Math.pow(lowFrequency, 2);
+          var lowPassSq = Math.pow(0, 2);
           var highPassSq = Math.pow(highFrequency, 2);
           if(highPassSq != 0)
             huv1 = 1/(1+(Math.pow((duv/highPassSq),2*order)));
