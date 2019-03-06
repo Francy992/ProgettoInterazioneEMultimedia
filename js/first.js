@@ -42,51 +42,14 @@ $("#slider_2_val").on("change", function(){
 /**
  * PASSBAND SLIDER
  */
-var cambioGlobale = false;
+
 
 var sliderBandPass_1_0 = $("#bandPass_1").slider({
 	formatter: function(value) {
-        if(!cambioGlobale){
-            var newVal = [];
-            console.log("1");
-            if(value.constructor == Array){
-                console.log("Dentro formatter, value vale: ", value)
-                var checkbox = $("#bandPass_1_checkBox").prop("checked");
-                if(checkbox){//proporzioni costanti
-                    if( bandPassMin1[0] !=  value[0]){//Ho mosso il primo
-                        var diff = 0;
-                        if( bandPassMin1[0] >  value[0])
-                            diff = bandPassMin1[0] - value[0];
-                        else    
-                            diff = bandPassMin1[0] - value[0];
-                        bandPassMin1[0] = value[0];
-                        bandPassMax1[0] = value[1] + diff;
-                        value[1] = value[1] + diff;
-                    }
-                }
-                else{
-                    console.log("SSSSSSSSS");
-                    bandPassMin1[0] = value[0];
-                    bandPassMax1[0] = value[1];
-                }
-                var sliderLowPassVal = $("#bandPass_1");
-                console.log("Dentro formatter2, value vale: ", value, bandPassMin1[0], bandPassMax1[0]);
-                newVal[0] = bandPassMin1[0];
-                newVal[1] = bandPassMax1[0];
-                console.log("Newval vale: ", newVal);
-                sliderLowPassVal.val(newVal);
-                $("#bandPass_1").slider('setValue',[100,150],false,false);
-                cambioGlobale = true;
-                //$("#bandPass_1").slider("refresh");
-    
-                $("#bandPass_1_min").html("<b>"+bandPassMin1[0]+"</b>");
-                $("#bandPass_1_max").html("<b>"+bandPassMax1[0])+"</b>";
-            }
-        }
-        else    
-            cambioGlobale = false;
-        
-        
+        var sliderLowPassVal = $("#bandPass_1");
+        sliderLowPassVal.val(value);
+        $("#bandPass_1_min").html("<b>"+bandPassMin1[0]+"</b>");
+        $("#bandPass_1_max").html("<b>"+bandPassMax1[0])+"</b>";
 	}
 });
 var sliderBandPass_2_0 = $("#bandPass_2").slider({
@@ -216,7 +179,8 @@ $( document ).ready(function() {
     });
 
     sliderBandPass_1_0.on("change", function(val){
-        console.log("2");
+        bandPassMin1[0] = val.value.newValue[0];
+        bandPassMax1[0] = val.value.newValue[1];
         recalculate1 = true;
         printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, "Circle of frequency", 1);
     });
