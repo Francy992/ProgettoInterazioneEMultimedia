@@ -1,6 +1,3 @@
-//TODO: inserire rumore casuale in un immagine e scaricare il tutto.
-//TODO: controllare come far attivare questo taglio nel caso di gaussiano/butterborth.
-
 var bandPassMin1 = [];
     bandPassMin1[0] = 0;
 var bandPassMax1 = [];
@@ -431,7 +428,7 @@ $( document ).ready(function() {
         $("#go").removeAttr("disabled");
         $('#spinner').hide(); 
         //TODO: Commentare questa riga
-        addRandomNoise(redLevel, greenLevel, blueLevel, dims, context1Riga1, "Immagine con rumore casuale Sale e Pepe.");
+        //addRandomNoise(redLevel, greenLevel, blueLevel, dims, context1Riga1, "Immagine con rumore casuale Sale e Pepe.");
     }, 400);
        
 
