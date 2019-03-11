@@ -1,11 +1,14 @@
+var imgRiga1 = document.getElementById("imgRiga1");
+var dims = [imgRiga1.naturalWidth, imgRiga1.naturalHeight];
+console.log(dims);
 var bandPassMin1 = [];
     bandPassMin1[0] = 0;
 var bandPassMax1 = [];
-    bandPassMax1[0] = 512;
+    bandPassMax1[0] = dims[1];
 var bandPassMin2 = [];
     bandPassMin2[0] = 0;
 var bandPassMax2 = [];
-    bandPassMax2[0] = 512;
+    bandPassMax2[0] = dims[1];
 //slider: 
 var slider_1 = $("#slider_1").slider({
 	formatter: function(value) {
@@ -15,14 +18,20 @@ var slider_1 = $("#slider_1").slider({
         recalculate1 = true;
 	}
 });
+$("#slider_1_val").attr("max", dims[1]);
+$("#slider_1").slider('setAttribute', 'max', dims[1]);
+$("#slider_1").slider('refresh');
 var slider_2 = $("#slider_2").slider({
 	formatter: function(value) {
         var sliderHighPassVal = $("#slider_2_val");
         sliderHighPassVal.val(value);
         frequency2 = value;
         recalculate2 = true;
-	}
+    }
 });
+$("#slider_2_val").attr("max", dims[1]);
+$("#slider_2").slider('setAttribute', 'max', dims[1]);
+$("#slider_2").slider('refresh');
 
 $("#slider_1_val").on("change", function(){     
     $("#slider_1").slider("setValue",$(this).val());
