@@ -62,10 +62,20 @@ var sliderBandPass_2_0 = $("#bandPass_2").slider({
 $("#butterworth_1").on("change", function(){
     butterworthOrder1 = $(this).val();
     recalculate1 = true;
+    if(cosa1 == "LowPass" || cosa1 == "HighPass"){
+        setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, frequency1, frequency1, context1MagnitudeRiga1, "Circle of frequency", tipo1, cosa1, butterworthOrder1);
+    }
+    else
+        printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga1, "Circle of frequency", 1);
 });
 $("#butterworth_2").on("change", function(){
     butterworthOrder2 = $(this).val();
     recalculate2 = true;
+    if(cosa2 == "LowPass" || cosa2 == "HighPass"){
+        setCirclePassBand(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, dims, frequency2, frequency2, context1MagnitudeRiga2, "Circle of frequency", tipo2, cosa2, butterworthOrder2);
+    }
+    else
+        printCircleMultiple(redLevelMagnitudoRgb, greenLevelMagnitudoRgb, blueLevelMagnitudoRgb, context1MagnitudeRiga2, "Circle of frequency", 2);
 });
 
 
